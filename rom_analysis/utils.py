@@ -7,6 +7,9 @@ subject_dir_to_id = lambda n: int(n.name.split("_", 1)[1])
 id_to_subject_dir = lambda id: f"subject_{id}"
 
 
+DIMENSION_NAMES = ("JOINT1", "JOINT2", "JOINT3", "JOINT4")  # TODO figure out
+
+
 def load_subject_condition_data(
     data_dir: Path, subject_id: int, condition_name: str
 ) -> NDArray:
