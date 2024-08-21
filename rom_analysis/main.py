@@ -4,6 +4,7 @@ TODO:
 1. run over multiple seeds.
 2. cache data generation
 3. save learned models and results
+4. create eval visualization
 """
 
 import argparse
