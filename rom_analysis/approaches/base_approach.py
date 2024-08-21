@@ -5,17 +5,15 @@ import abc
 import numpy as np
 from numpy.typing import NDArray
 
+from dataset import Dataset
+
 
 class BaseApproach(abc.ABC):
     """An approach."""
 
     @abc.abstractmethod
-    def train(self, dataset: dict[tuple[int, str], tuple[NDArray, NDArray]]) -> None:
-        """The dataset maps (subject ID, condition name) to a tuple:
-
-        - A 1D array of "input" features describing the subject / condition
-        - A multi-D array of "output" range of motion samples.
-        """
+    def train(self, dataset: Dataset) -> None:
+        """Train the approach."""
 
     @abc.abstractmethod
     def predict(self, input_features: NDArray, points: NDArray) -> NDArray[np.bool_]:

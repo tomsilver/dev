@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib.widgets import RangeSlider
 from numpy.typing import NDArray
 
-from utils import DIMENSION_NAMES, load_subject_condition_data
+from dataset import DIMENSION_NAMES, load_subject_condition_data
 
 
 def _main(data_dir: Path, subject_id: int, condition_name: str) -> None:

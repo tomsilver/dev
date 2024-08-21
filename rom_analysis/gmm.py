@@ -23,8 +23,8 @@ from numpy.typing import NDArray
 from sklearn.mixture import GaussianMixture
 from tomsutils.utils import fig2data
 
-from utils import (DIMENSION_NAMES, inspect_data_dir,
-                   load_subject_condition_data)
+from dataset import (DIMENSION_NAMES, inspect_data_dir,
+                     load_subject_condition_data)
 
 
 def _fit_gmm(data: NDArray, n_components: int) -> GaussianMixture:
