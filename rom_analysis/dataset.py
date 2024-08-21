@@ -4,6 +4,7 @@ from typing import TypeAlias
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
+from sklearn.svm import OneClassSVM
 
 # A Dataset dict maps (subject ID, condition name) to a tuple:
 #  - A 1D array of "input" features describing the subject / conditio
@@ -14,7 +15,13 @@ subject_dir_to_id = lambda n: int(n.name.split("_", 1)[1])
 id_to_subject_dir = lambda id: f"subject_{id}"
 
 
-DIMENSION_NAMES = ("shouder_aa", "shoulder_fe", "shoulder_rot", "elbow_flexion")
+DIMENSION_NAMES = ("shoulder_aa", "shoulder_fe", "shoulder_rot", "elbow_flexion")
+DIMENSION_LIMITS = {
+    "shoulder_aa": (-150, 150),
+    "shoulder_fe": (0, 180),
+    "shoulder_rot": (-50, 300),
+    "elbow_flexion": (-10, 180),
+}
 
 
 def load_subject_condition_data(
@@ -92,3 +99,34 @@ def create_dataset(
             dataset[(subject_id, condition_name)] = (inputs, outputs)
 
     return train_data, eval_data
+
+
+def create_classification_data_from_rom_data(
+    arr: NDArray, num_samples: int = 10000, seed: int = 0
+) -> tuple[NDArray, NDArray]:
+    """Create classification data by fitting a OneClassSVM."""
+    rng = np.random.default_rng(seed)
+
+    # Fit the SVM.
+    svm = OneClassSVM(kernel="rbf", gamma=0.001, nu=0.01)
+    svm.fit(arr)
+
+    # Sample inputs.
+    samples_transpose = []
+    for dim_name in DIMENSION_NAMES:
+        dim_min, dim_max = DIMENSION_LIMITS[dim_name]
+        samples_transpose.append(rng.uniform(dim_min, dim_max, num_samples))
+    samples = np.vstack(samples_transpose).T
+
+    # Evaluate the samples.
+    labels_one_or_negative_one = svm.predict(samples)
+    labels = labels_one_or_negative_one == 1
+
+    num_pos = sum(labels)
+    num_neg = sum(np.logical_not(labels))
+    assert num_pos + num_neg == num_samples
+    print(
+        f"Created classification dataset with {num_pos} positive and {num_neg} negative samples."
+    )
+
+    return samples, labels

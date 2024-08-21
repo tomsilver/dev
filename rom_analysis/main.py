@@ -6,15 +6,27 @@ TODO: run over multiple seeds.
 import argparse
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from approaches.base_approach import BaseApproach
 from approaches.constant_approach import ConstantApproach
-from dataset import create_dataset, Dataset
+from dataset import (Dataset, create_classification_data_from_rom_data,
+                     create_dataset)
 
 
-def _evaluate_approach(approach: BaseApproach, eval_data: Dataset) -> float:
-    import ipdb; ipdb.set_trace()
+def _evaluate_approach(
+    approach: BaseApproach, eval_data: Dataset, num_eval_samples: int = 10000
+) -> float:
+    accuracies = []
+    for _, (input_feats, eval_arr) in eval_data.items():
+        points, labels = create_classification_data_from_rom_data(
+            eval_arr, num_samples=num_eval_samples
+        )
+        preds = approach.predict(input_feats, points)
+        accuracy = (labels == preds).sum() / len(preds)
+        accuracies.append(accuracy)
+    return float(np.mean(accuracies))
 
 
 def _main(data_dir: Path, results_dir: Path) -> None:
@@ -36,8 +48,8 @@ def _main(data_dir: Path, results_dir: Path) -> None:
         results.append((approach_name, accuracy))
 
     # Report results.
-    df = pd.DataFrame(results, headers=headers)
-    import ipdb; ipdb.set_trace()
+    df = pd.DataFrame(results, columns=headers)
+    print(df)
 
 
 if __name__ == "__main__":
