@@ -5,6 +5,7 @@ TODO:
 1. Do the model learning and prediction part.
 2. Compare different numbers of components.
 3. Try with data resampling from SVM region first?
+4. Train model to directly output modes (using Gaussian-type loss) instead?
 """
 
 import argparse
