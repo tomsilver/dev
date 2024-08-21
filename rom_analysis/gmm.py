@@ -58,7 +58,7 @@ def _visualize_gmm(
         ax.set_ylabel(dim1_name)
         ax.scatter(data[:, dim0], data[:, dim1], s=0.5, color=(0.0, 0.5, 0.8, 0.25))
 
-        # Show the GMM.
+        # Prepare the GMM.
         means, covs = [], []
         for c in range(len(gmm.means_)):
             component_mean = np.array([gmm.means_[c, dim0], gmm.means_[c, dim1]])
@@ -70,7 +70,16 @@ def _visualize_gmm(
             )
             means.append(component_mean)
             covs.append(component_cov)
-        for mean, cov in zip(means, covs):
+        components = list(zip(means, covs))
+
+        center_colors = ["red", "green", "orange", "purple", "brown"]
+        assert len(center_colors) >= len(means), "Add more colors!"
+
+        # Sort the components in some consistent way.
+        key = lambda mc: tuple(mc[0])
+        components = sorted(components, key=key)
+        
+        for (mean, cov), center_color in zip(components, center_colors):
             eigvals, eigvecs = np.linalg.eigh(cov)
             angle = np.degrees(np.arctan2(*eigvecs[:, 0][::-1]))
             width, height = 2 * np.sqrt(eigvals)
@@ -78,7 +87,7 @@ def _visualize_gmm(
                 mean, width, height, angle=angle, edgecolor="black", facecolor="none"
             )
             ax.add_patch(ell)
-            ax.plot(*mean, "ro")  # Red dot at the mean
+            ax.plot(*mean, marker="o", color=center_color)  # Red dot at the mean
 
     plt.tight_layout()
 
