@@ -1,6 +1,9 @@
 """Run main experiments.
 
-TODO: run over multiple seeds.
+TODO:
+1. run over multiple seeds.
+2. cache data generation
+3. save learned models and results
 """
 
 import argparse
@@ -16,7 +19,7 @@ from dataset import (Dataset, create_classification_data_from_rom_data,
 
 
 def _evaluate_approach(
-    approach: BaseApproach, eval_data: Dataset, num_eval_samples: int = 10000
+    approach: BaseApproach, eval_data: Dataset, num_eval_samples: int = 1000
 ) -> float:
     accuracies = []
     for _, (input_feats, eval_arr) in eval_data.items():

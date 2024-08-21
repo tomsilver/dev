@@ -102,7 +102,10 @@ def create_dataset(
 
 
 def create_classification_data_from_rom_data(
-    arr: NDArray, num_samples: int = 10000, seed: int = 0
+    arr: NDArray,
+    num_samples: int = 1000,
+    seed: int = 0,
+    balance_classes: bool = True,
 ) -> tuple[NDArray, NDArray]:
     """Create classification data by fitting a OneClassSVM."""
     rng = np.random.default_rng(seed)
@@ -111,22 +114,34 @@ def create_classification_data_from_rom_data(
     svm = OneClassSVM(kernel="rbf", gamma=0.001, nu=0.01)
     svm.fit(arr)
 
-    # Sample inputs.
-    samples_transpose = []
-    for dim_name in DIMENSION_NAMES:
-        dim_min, dim_max = DIMENSION_LIMITS[dim_name]
-        samples_transpose.append(rng.uniform(dim_min, dim_max, num_samples))
-    samples = np.vstack(samples_transpose).T
+    # Sample inputs and outputs.
+    samples: list[list[float]] = []
+    labels: list[bool] = []
+    num_pos, num_neg = 0, 0
+    while len(samples) < num_samples:
+        sample = []
+        for dim_name in DIMENSION_NAMES:
+            dim_min, dim_max = DIMENSION_LIMITS[dim_name]
+            sample.append(rng.uniform(dim_min, dim_max))
+        pred = svm.predict([np.array(sample)])[0]
+        assert pred in {-1, 1}
+        label = pred == 1
+        if (
+            balance_classes
+            and (label and num_pos >= num_samples // 2)
+            or (not label and num_neg >= num_samples // 2)
+        ):
+            continue
+        if label:
+            num_pos += 1
+        else:
+            num_neg += 1
+        samples.append(sample)
+        labels.append(label)
 
-    # Evaluate the samples.
-    labels_one_or_negative_one = svm.predict(samples)
-    labels = labels_one_or_negative_one == 1
-
-    num_pos = sum(labels)
-    num_neg = sum(np.logical_not(labels))
     assert num_pos + num_neg == num_samples
     print(
         f"Created classification dataset with {num_pos} positive and {num_neg} negative samples."
     )
 
-    return samples, labels
+    return np.array(samples), np.array(labels)
