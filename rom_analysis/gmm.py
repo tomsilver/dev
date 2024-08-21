@@ -6,6 +6,8 @@ TODO:
 2. Compare different numbers of components.
 3. Try with data resampling from SVM region first?
 4. Train model to directly output modes (using Gaussian-type loss) instead?
+5. Try diagonal covariance.
+6. Implement problem/approach/metric stuff.
 """
 
 import argparse
