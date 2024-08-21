@@ -25,7 +25,7 @@ def load_subject_condition_data(
     arr = np.load(subject_condition_data_dir)
     _, num_dof = arr.shape
     assert num_dof == 4
-    return arr
+    return arr  # type: ignore
 
 
 def inspect_data_dir(data_dir: Path) -> tuple[list[int], list[str]]:

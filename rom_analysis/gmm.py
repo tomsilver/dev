@@ -11,18 +11,20 @@ TODO:
 """
 
 import argparse
-from pathlib import Path
-from sklearn.mixture import GaussianMixture
-import numpy as np
-from numpy.typing import NDArray
 import itertools
-from matplotlib import pyplot as plt
 import os
-from tomsutils.utils import fig2data
-import imageio.v2 as iio
+from pathlib import Path
 
-from utils import load_subject_condition_data, inspect_data_dir, DIMENSION_NAMES
+import imageio.v2 as iio
+import numpy as np
+from matplotlib import pyplot as plt
 from matplotlib.patches import Ellipse
+from numpy.typing import NDArray
+from sklearn.mixture import GaussianMixture
+from tomsutils.utils import fig2data
+
+from utils import (DIMENSION_NAMES, inspect_data_dir,
+                   load_subject_condition_data)
 
 
 def _fit_gmm(data: NDArray, n_components: int) -> GaussianMixture:
@@ -80,16 +82,23 @@ def _visualize_gmm(
         # Sort the components in some consistent way.
         key = lambda mc: tuple(mc[0])
         components = sorted(components, key=key)
-        
-        for (mean, cov), center_color in zip(components, center_colors):
+
+        for ((mean_x, mean_y), cov), center_color in zip(components, center_colors):
             eigvals, eigvecs = np.linalg.eigh(cov)
             angle = np.degrees(np.arctan2(*eigvecs[:, 0][::-1]))
             width, height = 2 * np.sqrt(eigvals)
             ell = Ellipse(
-                mean, width, height, angle=angle, edgecolor="black", facecolor="none"
+                (mean_x, mean_y),
+                width,
+                height,
+                angle=angle,
+                edgecolor="black",
+                facecolor="none",
             )
             ax.add_patch(ell)
-            ax.plot(*mean, marker="o", color=center_color)  # Red dot at the mean
+            ax.plot(
+                mean_x, mean_y, marker="o", color=center_color
+            )  # Red dot at the mean
 
     plt.tight_layout()
 
