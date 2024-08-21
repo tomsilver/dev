@@ -7,7 +7,7 @@ subject_dir_to_id = lambda n: int(n.name.split("_", 1)[1])
 id_to_subject_dir = lambda id: f"subject_{id}"
 
 
-DIMENSION_NAMES = ("JOINT1", "JOINT2", "JOINT3", "JOINT4")  # TODO figure out
+DIMENSION_NAMES = ("shouder_aa", "shoulder_fe", "shoulder_rot", "elbow_flexion")
 
 
 def load_subject_condition_data(
@@ -23,7 +23,7 @@ def load_subject_condition_data(
     subject_condition_data_dir = trial_dir / "raw_data.npy"
     assert subject_condition_data_dir.exists(), subject_condition_data_dir
     arr = np.load(subject_condition_data_dir)
-    num_data, num_dof = arr.shape
+    _, num_dof = arr.shape
     assert num_dof == 4
     return arr
 
