@@ -2,7 +2,6 @@
 
 TODO:
 1. run over multiple seeds.
-2. save learned models and results
 """
 
 import argparse
@@ -14,6 +13,7 @@ import pandas as pd
 
 from approaches.base_approach import BaseApproach
 from approaches.constant_approach import ConstantApproach
+from approaches.implicit_knn import ImplicitKNN
 from approaches.implicit_mlp import ImplicitMLP
 from dataset import (Dataset, create_classification_data_from_rom_data,
                      create_dataset)
@@ -64,8 +64,9 @@ def _main(
     # Create approaches.
     approaches: dict[str, BaseApproach] = {
         "Implicit MLP": ImplicitMLP(cache_dir),
-        # "Always True": ConstantApproach(True),
-        # "Always False": ConstantApproach(False),
+        "Implicit KNN": ImplicitKNN(cache_dir),
+        "Always True": ConstantApproach(True),
+        "Always False": ConstantApproach(False),
     }
 
     # Create training and eval data.
