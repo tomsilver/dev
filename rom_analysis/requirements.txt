@@ -1,6 +1,10 @@
 numpy
 matplotlib
+pandas
 black
 docformatter
 isort
 mypy
+scikit-learn
+tomsutils@git+https://github.com/tomsilver/toms-utils.git
+imageio
