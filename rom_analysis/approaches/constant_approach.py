@@ -12,6 +12,9 @@ class ConstantApproach(BaseApproach):
     def __init__(self, prediction: bool):
         self._prediction = prediction
 
+    def get_name(self) -> str:
+        return f"always-{self._prediction}"
+
     def train(self, dataset: dict[tuple[int, str], tuple[NDArray, NDArray]]) -> None:
         pass
 

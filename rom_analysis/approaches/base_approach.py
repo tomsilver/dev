@@ -12,6 +12,10 @@ class BaseApproach(abc.ABC):
     """An approach."""
 
     @abc.abstractmethod
+    def get_name(self) -> str:
+        """The name of the approach."""
+
+    @abc.abstractmethod
     def train(self, dataset: Dataset) -> None:
         """Train the approach."""
 

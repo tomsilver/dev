@@ -48,7 +48,7 @@ def _evaluate_approach(
 
         # Visualize the predictions.
         title = f"Predictions: {subject_id} [{condition_name}]"
-        outfile = results_dir / f"eval_predictions_{data_id}.png"
+        outfile = results_dir / f"eval_predictions_{approach.get_name()}_{data_id}.png"
         visualize_evaluation(eval_arr, points, preds, title, outfile)
 
     return float(np.mean(accuracies))
