@@ -27,12 +27,12 @@ def _evaluate_approach(
     results_dir: Path,
     num_eval_samples: int = 1000,
     make_eval_plots: bool = False,
-) -> float:
+) -> dict[tuple[int, str], float]:
 
     os.makedirs(cache_dir, exist_ok=True)
     os.makedirs(results_dir, exist_ok=True)
 
-    accuracies = []
+    accuracies: dict[tuple[int, str], float] = {}
     for (subject_id, condition_name), (input_feats, eval_arr) in eval_data.items():
         data_id = f"{subject_id}_{condition_name}"
         points, labels = create_classification_data_from_rom_data(
@@ -40,7 +40,7 @@ def _evaluate_approach(
         )
         preds = approach.predict(input_feats, points)
         accuracy = (labels == preds).sum() / len(preds)
-        accuracies.append(accuracy)
+        accuracies[(subject_id, condition_name)] = accuracy
 
         if make_eval_plots:
             # Visualize the "ground truth" data.
@@ -55,7 +55,7 @@ def _evaluate_approach(
             )
             visualize_evaluation(eval_arr, points, preds, title, outfile)
 
-    return float(np.mean(accuracies))
+    return accuracies
 
 
 def _main(
@@ -64,26 +64,27 @@ def _main(
     # Create approaches.
     approaches: dict[str, BaseApproach] = {
         "Implicit MLP": ImplicitMLP(cache_dir),
-        "Always True": ConstantApproach(True),
-        "Always False": ConstantApproach(False),
+        # "Always True": ConstantApproach(True),
+        # "Always False": ConstantApproach(False),
     }
 
     # Create training and eval data.
     training_data, eval_data = create_dataset(data_dir)
 
     # Train and evaluate the approaches.
-    results: list[tuple[str, float]] = []
-    headers = ["Approach", "Accuracy"]
+    results: list[tuple[int, str, str, float]] = []
+    headers = ["Subject ID", "Condition", "Approach", "Accuracy"]
     for approach_title, approach in approaches.items():
         model_save_file = cache_dir / f"{approach.get_name()}.model"
         loaded = approach.try_load(model_save_file)
         if not loaded:
             approach.train(training_data)
         approach.save(model_save_file)
-        accuracy = _evaluate_approach(
+        accuracies = _evaluate_approach(
             approach, eval_data, cache_dir, results_dir, make_eval_plots=make_eval_plots
         )
-        results.append((approach_title, accuracy))
+        for (subject_id, condition_name), accuracy in accuracies.items():
+            results.append((subject_id, condition_name, approach_title, accuracy))
 
     # Report results.
     df = pd.DataFrame(results, columns=headers)
