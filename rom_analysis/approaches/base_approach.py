@@ -1,6 +1,7 @@
 """Defines the API for an approach."""
 
 import abc
+from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
@@ -23,3 +24,11 @@ class BaseApproach(abc.ABC):
     def predict(self, input_features: NDArray, points: NDArray) -> NDArray[np.bool_]:
         """Given input features for a new subject / condition, predict whether
         the given points are within their range of motion."""
+
+    @abc.abstractmethod
+    def save(self, filepath: Path) -> None:
+        """Save the trained model."""
+
+    @abc.abstractmethod
+    def try_load(self, filepath: Path) -> bool:
+        """Attempt to load a saved model."""

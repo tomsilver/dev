@@ -1,5 +1,7 @@
 """Predict always true or always false."""
 
+from pathlib import Path
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -21,3 +23,9 @@ class ConstantApproach(BaseApproach):
     def predict(self, input_features: NDArray, points: NDArray) -> NDArray[np.bool_]:
         num_predictions = len(points)
         return np.array([self._prediction] * num_predictions)
+
+    def save(self, filepath: Path) -> None:
+        pass
+
+    def try_load(self, filepath: Path) -> bool:
+        return True  # no loading actually needed
