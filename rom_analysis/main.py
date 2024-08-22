@@ -80,7 +80,7 @@ def _main(
         loaded = approach.try_load(model_save_file)
         if not loaded:
             approach.train(training_data)
-        approach.save(model_save_file)
+            approach.save(model_save_file)
         accuracies = _evaluate_approach(
             approach, eval_data, cache_dir, results_dir, make_eval_plots=make_eval_plots
         )
