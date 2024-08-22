@@ -87,8 +87,13 @@ def _main(
             results.append((subject_id, condition_name, approach_title, accuracy))
 
     # Report results.
+    print("ALL RESULTS:")
     df = pd.DataFrame(results, columns=headers)
     print(df)
+
+    print("SUMMARY:")
+    summary_df = df.groupby("Approach")["Accuracy"].mean()
+    print(summary_df)
 
 
 if __name__ == "__main__":
