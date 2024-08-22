@@ -14,6 +14,7 @@ import pandas as pd
 
 from approaches.base_approach import BaseApproach
 from approaches.constant_approach import ConstantApproach
+from approaches.implicit_mlp import ImplicitMLP
 from dataset import (Dataset, create_classification_data_from_rom_data,
                      create_dataset)
 from plotting import visualize_evaluation
@@ -56,6 +57,7 @@ def _evaluate_approach(
 def _main(data_dir: Path, results_dir: Path, cache_dir: Path) -> None:
     # Create approaches.
     approaches: dict[str, BaseApproach] = {
+        "Implicit MLP": ImplicitMLP(cache_dir),
         "Always True": ConstantApproach(True),
         "Always False": ConstantApproach(False),
     }
