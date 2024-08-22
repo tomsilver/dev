@@ -20,12 +20,16 @@ from dataset import (Dataset, create_classification_data_from_rom_data,
 
 
 def _evaluate_approach(
-    approach: BaseApproach, eval_data: Dataset, num_eval_samples: int = 1000
+    approach: BaseApproach,
+    eval_data: Dataset,
+    cache_dir: Path,
+    num_eval_samples: int = 1000,
 ) -> float:
     accuracies = []
-    for _, (input_feats, eval_arr) in eval_data.items():
+    for (subject_id, condition_name), (input_feats, eval_arr) in eval_data.items():
+        data_id = f"{subject_id}_{condition_name}"
         points, labels = create_classification_data_from_rom_data(
-            eval_arr, num_samples=num_eval_samples
+            eval_arr, data_id, cache_dir, num_samples=num_eval_samples
         )
         preds = approach.predict(input_feats, points)
         accuracy = (labels == preds).sum() / len(preds)
@@ -33,7 +37,7 @@ def _evaluate_approach(
     return float(np.mean(accuracies))
 
 
-def _main(data_dir: Path, results_dir: Path) -> None:
+def _main(data_dir: Path, results_dir: Path, cache_dir: Path) -> None:
     # Create approaches.
     approaches: dict[str, BaseApproach] = {
         "Always True": ConstantApproach(True),
@@ -48,7 +52,7 @@ def _main(data_dir: Path, results_dir: Path) -> None:
     headers = ["Approach", "Accuracy"]
     for approach_name, approach in approaches.items():
         approach.train(training_data)
-        accuracy = _evaluate_approach(approach, eval_data)
+        accuracy = _evaluate_approach(approach, eval_data, cache_dir)
         results.append((approach_name, accuracy))
 
     # Report results.
@@ -62,5 +66,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--results_dir", type=Path, default=Path(__file__).parent / "results"
     )
+    parser.add_argument(
+        "--cache_dir",
+        type=Path,
+        default=Path(__file__).parents[1] / "private" / "rom-cache",
+    )
     args = parser.parse_args()
-    _main(args.data_dir, args.results_dir)
+    _main(args.data_dir, args.results_dir, args.cache_dir)

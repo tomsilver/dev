@@ -1,3 +1,5 @@
+import os
+import pickle
 from pathlib import Path
 from typing import TypeAlias
 
@@ -103,11 +105,22 @@ def create_dataset(
 
 def create_classification_data_from_rom_data(
     arr: NDArray,
+    data_id: str,
+    cache_dir: Path,
     num_samples: int = 1000,
     seed: int = 0,
     balance_classes: bool = True,
 ) -> tuple[NDArray, NDArray]:
     """Create classification data by fitting a OneClassSVM."""
+
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = cache_dir / f"{data_id}_classification_{seed}_{num_samples}.p"
+    if cache_file.exists():
+        with open(cache_file, "rb") as f:
+            loaded_dataset = pickle.load(f)
+            print(f"Loaded dataset from {cache_file}")
+            return loaded_dataset  # type: ignore
+
     rng = np.random.default_rng(seed)
 
     # Fit the SVM.
@@ -144,4 +157,10 @@ def create_classification_data_from_rom_data(
         f"Created classification dataset with {num_pos} positive and {num_neg} negative samples."
     )
 
-    return np.array(samples), np.array(labels)
+    dataset = (np.array(samples), np.array(labels))
+
+    with open(cache_file, "wb") as f:
+        pickle.dump(dataset, f)
+    print(f"Cached dataset to {cache_file}")
+
+    return dataset
