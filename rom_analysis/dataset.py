@@ -114,7 +114,10 @@ def create_classification_data_from_rom_data(
     """Create classification data by fitting a OneClassSVM."""
 
     os.makedirs(cache_dir, exist_ok=True)
-    cache_file = cache_dir / f"{data_id}_classification_{seed}_{num_samples}.p"
+    balanced_suffix = "" if balance_classes else "_unbalanced"
+    cache_file = (
+        cache_dir / f"{data_id}_classification_{seed}_{num_samples}{balanced_suffix}.p"
+    )
     if cache_file.exists():
         with open(cache_file, "rb") as f:
             loaded_dataset = pickle.load(f)
@@ -139,9 +142,8 @@ def create_classification_data_from_rom_data(
         pred = svm.predict([np.array(sample)])[0]
         assert pred in {-1, 1}
         label = pred == 1
-        if (
-            balance_classes
-            and (label and num_pos >= num_samples // 2)
+        if balance_classes and (
+            (label and num_pos >= num_samples // 2)
             or (not label and num_neg >= num_samples // 2)
         ):
             continue

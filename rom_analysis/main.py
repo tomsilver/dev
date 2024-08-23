@@ -25,7 +25,8 @@ def _evaluate_approach(
     eval_data: Dataset,
     cache_dir: Path,
     results_dir: Path,
-    num_eval_samples: int = 1000,
+    num_eval_samples: int = 10000,
+    balance_eval_samples: bool = False,
     make_eval_plots: bool = False,
 ) -> dict[tuple[int, str], float]:
 
@@ -36,7 +37,11 @@ def _evaluate_approach(
     for (subject_id, condition_name), (input_feats, eval_arr) in eval_data.items():
         data_id = f"{subject_id}_{condition_name}"
         points, labels = create_classification_data_from_rom_data(
-            eval_arr, data_id, cache_dir, num_samples=num_eval_samples
+            eval_arr,
+            data_id,
+            cache_dir,
+            num_samples=num_eval_samples,
+            balance_classes=balance_eval_samples,
         )
         preds = approach.predict(input_feats, points)
         accuracy = (labels == preds).sum() / len(preds)
