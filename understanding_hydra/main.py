@@ -1,8 +1,4 @@
-"""Run python main.py -m seed=1,2,3
-
-Questions:
-1. How does this work with mypy? Note cfg.seed type not recognized
-2. 
+"""Run python main.py -m seed=1,2,3 model=foo,bar
 """
 
 import hydra
@@ -10,6 +6,7 @@ from omegaconf import DictConfig
 from dataclasses import dataclass
 import abc
 import numpy as np
+import logging
 
 
 class BaseModel(abc.ABC):
@@ -55,6 +52,7 @@ class BarModel(BaseModel):
 
 @hydra.main(version_base=None, config_path="conf/", config_name="config")
 def _main(cfg: DictConfig) -> None:
+    logging.info(f"Running with {cfg.seed} and {cfg.model}")
     model = hydra.utils.instantiate(cfg.model)
     rng = np.random.default_rng(cfg.seed)
     inputs = rng.uniform(0, 1, size=100)
