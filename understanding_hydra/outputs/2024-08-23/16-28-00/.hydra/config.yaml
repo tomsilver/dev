@@ -1,0 +1,4 @@
+seed: 3
+model:
+  _target_: main.BarModel
+  foo: 10
