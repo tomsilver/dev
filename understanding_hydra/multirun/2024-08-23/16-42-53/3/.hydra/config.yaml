@@ -1,4 +1,0 @@
-model:
-  _target_: main.BarModel
-  bar: 0
-seed: 2

@@ -1,5 +1,0 @@
-seed: 1
-model_conf:
-  model:
-    _target_: main.FooModel
-    foo: 0
