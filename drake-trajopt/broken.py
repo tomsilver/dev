@@ -1,5 +1,9 @@
 import numpy as np
-from pydrake.all import DiagramBuilder, AddMultibodyPlantSceneGraph, Parser, RigidTransform, MathematicalProgram
+from pydrake.systems.framework import DiagramBuilder
+from pydrake.multibody.plant import AddMultibodyPlantSceneGraph
+from pydrake.multibody.parsing import Parser
+from pydrake.math import RigidTransform
+from pydrake.solvers import MathematicalProgram
 
 ####################################
 # Minimal broken code
