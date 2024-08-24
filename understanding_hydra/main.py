@@ -1,7 +1,7 @@
 """Run: python main.py -m seed=1,2,3 +model=foo,bar"""
 
 import hydra
-from omegaconf import DictConfig, MISSING
+from omegaconf import MISSING
 from hydra.core.config_store import ConfigStore
 from dataclasses import dataclass
 import abc
@@ -69,9 +69,10 @@ cs.store(group="model", name="bar", node=BarConfig)
 
 
 @hydra.main(version_base=None, config_name="config")
-def _main(cfg: DictConfig) -> None:
+def _main(cfg: ExperimentConfig) -> None:
     logging.info(f"Running with {cfg.seed} and {cfg.model}")
     model = hydra.utils.instantiate(cfg.model)
+    assert isinstance(model, BaseModel)
     rng = np.random.default_rng(cfg.seed)
     print(model.predict(rng.uniform()))
 
