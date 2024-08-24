@@ -1,12 +1,13 @@
-"""Run python main.py -m seed=1,2,3 model=foo,bar
-"""
+"""Run: python main.py -m seed=1,2,3 +model=foo,bar"""
 
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, MISSING
+from hydra.core.config_store import ConfigStore
 from dataclasses import dataclass
 import abc
 import numpy as np
 import logging
+from typing import Any
 
 
 class BaseModel(abc.ABC):
@@ -16,11 +17,13 @@ class BaseModel(abc.ABC):
     def predict(self, x: float) -> float:
         """Predict an output from an input."""
 
+
 @dataclass
 class FooConfig:
     """Config for FooModel."""
 
-    foo: float
+    _target_: str = "main.FooModel"
+    foo: float = 0.0
 
 
 class FooModel(BaseModel):
@@ -37,7 +40,8 @@ class FooModel(BaseModel):
 class BarConfig:
     """Config for BarModel."""
 
-    bar: float
+    _target_: str = "main.BarModel"
+    bar: float = 1.0
 
 
 class BarModel(BaseModel):
@@ -47,17 +51,29 @@ class BarModel(BaseModel):
         self._bar = bar
 
     def predict(self, x: float) -> float:
-        return x + self._bar
+        return self._bar
+    
+
+@dataclass
+class ExperimentConfig:
+    """Config for a single experiment."""
+
+    seed: int = 0
+    model: Any = MISSING
 
 
-@hydra.main(version_base=None, config_path="conf/", config_name="config")
+cs = ConfigStore.instance()
+cs.store(name="config", node=ExperimentConfig)
+cs.store(group="model", name="foo", node=FooConfig)
+cs.store(group="model", name="bar", node=BarConfig)
+
+
+@hydra.main(version_base=None, config_name="config")
 def _main(cfg: DictConfig) -> None:
     logging.info(f"Running with {cfg.seed} and {cfg.model}")
     model = hydra.utils.instantiate(cfg.model)
     rng = np.random.default_rng(cfg.seed)
-    inputs = rng.uniform(0, 1, size=100)
-    outputs = model.predict(inputs)
-    print(outputs)
+    print(model.predict(rng.uniform()))
 
 
 if __name__ == "__main__":
