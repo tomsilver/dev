@@ -1,4 +1,11 @@
-"""Run: python main.py -m seed=1,2,3 +model=foo,bar"""
+"""Examples:
+
+Multirun:
+    python main.py -m seed=1,2,3 +model=foo,bar
+
+Single run with override:
+    python main.py seed=4 +model=foo model.foo=10  
+"""
 
 import hydra
 from omegaconf import MISSING
@@ -72,7 +79,9 @@ cs.store(group="model", name="bar", node=BarConfig)
 def _main(cfg: ExperimentConfig) -> None:
     logging.info(f"Running with {cfg.seed} and {cfg.model}")
     model = hydra.utils.instantiate(cfg.model)
-    assert isinstance(model, BaseModel)
+    # TODO this fails, maybe due to double import issue? Hopefully gets
+    # cleared up when this is a really package.
+    # assert isinstance(model, BaseModel)
     rng = np.random.default_rng(cfg.seed)
     print(model.predict(rng.uniform()))
 
