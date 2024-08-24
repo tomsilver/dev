@@ -1,0 +1,4 @@
+seed: 0
+defaults:
+  - _self_
+  - model: fizz
