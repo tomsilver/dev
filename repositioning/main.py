@@ -17,6 +17,7 @@ from dynamics.base_model import RepositioningDynamicsModel
 from dynamics.math_model import MathRepositioningDynamicsModel
 from dynamics.pybullet_constraint_model import \
     PybulletConstraintRepositioningDynamicsModel
+from dynamics.snopt_model import SNOPTRepositioningDynamicsModel
 from robots.human import HumanArm6DoF
 from robots.panda import PandaPybulletRobotLimbRepo
 
@@ -32,6 +33,9 @@ def _create_dynamics_model(
 
     if name == "pybullet-constraint":
         return PybulletConstraintRepositioningDynamicsModel(active_arm, passive_arm, dt)
+
+    if name == "snopt":
+        return SNOPTRepositioningDynamicsModel(active_arm, passive_arm, dt)
 
     raise NotImplementedError
 
@@ -49,7 +53,7 @@ def _create_scenario(
         camera_kwargs = {"camera_distance": 2.0, "camera_pitch": -60}
         physics_client_id = create_gui_connection(**camera_kwargs)
 
-        pad = 0.2 # add pad to prevent contact forces
+        pad = 0.0 # add pad to prevent contact forces
         active_arm_base_pose = Pose((-np.sqrt(2) - pad, 0.0, 0.0))
         active_arm_home_joint_positions = [-np.pi / 4, np.pi / 2]
         active_arm = TwoLinkPyBulletRobot(
@@ -67,18 +71,10 @@ def _create_scenario(
         )
 
         def _torque_fn(t: float) -> list[float]:
+            if t < 0.25:
+                return [1, -1]
             if t < 0.5:
-                return [0.1, -0.1]
-            if t < 1.0:
-                return [-0.1, 0.1]
-            if t < 1.5:
-                return [0.2, 0.0]
-            if t < 2.0:
-                return [-0.2, 0.0]
-            if t < 2.5:
-                return [0.0, 0.2]
-            if t < 3.0:
-                return [0.0, -0.2]
+                return [-1, 1]
             return [0.0, 0.0]
 
         return active_arm, passive_arm, _torque_fn, camera_kwargs
