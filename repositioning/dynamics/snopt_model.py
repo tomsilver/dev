@@ -28,6 +28,8 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
             self._sympy_active_fk_equation = dill.load(f)
         self._sympy_passive_fk_equation = self._sympy_active_fk_equation
 
+        self._rng = np.random.default_rng(0)
+
         # TODO: incorporate robot base poses in FK constraint.
     
         from pybullet_helpers.gui import visualize_pose
@@ -91,6 +93,8 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
         passive_qd = self._passive_arm.get_joint_velocities()
         passive_qdd = program.NewContinuousVariables(passive_dof, "passive_qdd")
         passive_torque = program.NewContinuousVariables(passive_dof, "passive_torque")
+        program.SetInitialGuess(passive_torque, self._rng.uniform(-10, 10, size=len(passive_torque)))
+
         next_passive_q = program.NewContinuousVariables(passive_dof, "next_passive_q")
         next_passive_qd = program.NewContinuousVariables(passive_dof, "next_passive_qd")
         next_passive_ee = program.NewContinuousVariables(3, "next_passive_ee")
@@ -105,6 +109,9 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
         result = solver.Solve(program)
         assert result.is_success()
         print(result.get_optimal_cost())
+        print(result.GetSolution(next_passive_ee))
+        # print(result.GetSolution(passive_torque))
+        print()
 
         self._active_arm.set_joints(result.GetSolution(next_active_q), joint_velocities=result.GetSolution(next_active_qd))
         self._passive_arm.set_joints(result.GetSolution(next_passive_q), joint_velocities=result.GetSolution(next_passive_qd))
@@ -171,12 +178,13 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
         for i in range(3):
             dist = (next_active_ee[i] - next_passive_ee[i])**2
             drake_ee.append(dist)
-        # program.AddConstraint(le(np.array(drake_ee), np.ones(len(drake_ee))))
+        # program.AddConstraint(le(np.array(drake_ee), 1e-2 * np.ones(len(drake_ee))))
         program.AddCost(sum(drake_ee))
 
         # Integrate.
         program.AddConstraint(eq(next_active_qd, active_qd + active_qdd * self._dt))
         program.AddConstraint(eq(next_active_q, active_q + next_active_qd * self._dt))
+        # NOTE: commenting this next line out helps...
         program.AddConstraint(eq(next_passive_qd, passive_qd + passive_qdd * self._dt))
         program.AddConstraint(eq(next_passive_q, passive_q + next_passive_qd * self._dt))
 
