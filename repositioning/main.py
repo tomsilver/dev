@@ -17,6 +17,7 @@ from dynamics.base_model import RepositioningDynamicsModel
 from dynamics.math_model import MathRepositioningDynamicsModel
 from dynamics.pybullet_constraint_model import \
     PybulletConstraintRepositioningDynamicsModel
+from dynamics.pin_constraint_model import PinConstraintRepositioningDynamicsModel
 from robots.human import HumanArm6DoF
 from robots.panda import PandaPybulletRobotLimbRepo
 
@@ -32,6 +33,9 @@ def _create_dynamics_model(
 
     if name == "pybullet-constraint":
         return PybulletConstraintRepositioningDynamicsModel(active_arm, passive_arm, dt)
+    
+    if name == "pin-constraint":
+        return PinConstraintRepositioningDynamicsModel(active_arm, passive_arm, dt)
 
     raise NotImplementedError
 
