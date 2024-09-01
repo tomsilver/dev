@@ -99,8 +99,10 @@ def _create_scenario(
         human.set_joints(human_init_joints)
 
         def _torque_fn(t: float) -> list[float]:
-            if t < 0.1:
-                return [1, 0.0, 0.0, 0.0, 0.0, 0.0]
+            if t < 0.5:
+                return [0.1, 0.0, 0.0, 0.01, 0.0, 0.0]
+            if t < 1:
+                return [-0.1, 0.0, 0.0, 0.01, 0.0, 0.0]
             return [0.0] * 6
 
         return robot, human, _torque_fn

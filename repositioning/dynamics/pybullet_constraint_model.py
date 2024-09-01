@@ -1,5 +1,6 @@
 """A model where PyBullet sets a constraint."""
 
+import numpy as np
 import pybullet as p
 from pybullet_helpers.geometry import multiply_poses
 
@@ -11,6 +12,7 @@ class PybulletConstraintRepositioningDynamicsModel(RepositioningDynamicsModel):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
+        # Create constraint.
         tf = multiply_poses(
             self._active_arm.get_end_effector_pose().invert(),
             self._passive_arm.get_end_effector_pose(),
@@ -28,6 +30,15 @@ class PybulletConstraintRepositioningDynamicsModel(RepositioningDynamicsModel):
             childFrameOrientation=tf.orientation,
             physicsClientId=self._active_arm.physics_client_id,
         )
+        # Need to disable default velocity control to use torque control.
+        for robot in [self._active_arm, self._passive_arm]:
+            p.setJointMotorControlArray(
+                robot.robot_id,
+                robot.arm_joints,
+                p.VELOCITY_CONTROL,
+                forces=np.zeros(len(robot.arm_joints)),
+                physicsClientId=robot.physics_client_id,
+            )
 
     def step(self, torque: list[float]) -> None:
         # TODO: move this into pybullet helpers.
@@ -39,7 +50,7 @@ class PybulletConstraintRepositioningDynamicsModel(RepositioningDynamicsModel):
             physicsClientId=self._active_arm.physics_client_id,
         )
         t = 0.0
-        pybullet_dt = 1.0 / 240
+        pybullet_dt = 1 / 240
         while t <= self._dt:
             p.stepSimulation(physicsClientId=self._active_arm.physics_client_id)
             t += pybullet_dt
