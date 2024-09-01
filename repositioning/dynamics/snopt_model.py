@@ -3,10 +3,11 @@
 import numpy as np
 import pybullet as p
 from numpy.typing import NDArray
-from pybullet_helpers.geometry import matrix_from_quat
+from pybullet_helpers.geometry import matrix_from_quat, multiply_poses, Pose
 from pybullet_helpers.robots.single_arm import SingleArmPyBulletRobot
 from pydrake.all import (MathematicalProgram, SnoptSolver, SolutionResult,
                          Expression, Variable, eq, le, sin, cos)
+from spatialmath import SE3
 import dill
 from pathlib import Path
 
@@ -27,10 +28,40 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
             self._sympy_active_fk_equation = dill.load(f)
         self._sympy_passive_fk_equation = self._sympy_active_fk_equation
 
-        # TODO: evaluate distance between end effectors in initial position.
-        # Quite likely there is a discrepancy between the end effector used in
-        # sympy's two-link model and the one in pybullet
-        import ipdb; ipdb.set_trace()
+        # TODO: incorporate robot base poses in FK constraint.
+    
+        from pybullet_helpers.gui import visualize_pose
+
+        # active_q = self._active_arm.get_joint_positions()
+        # base_to_ee = []
+        # for i in range(len(self._sympy_active_fk_equation)):
+        #     line = str(self._sympy_active_fk_equation[i])
+        #     for j in range(2):
+        #         line = line.replace(f"q_{j}", f"{active_q[j]}")
+        #     result = eval(line)
+        #     base_to_ee.append(result)
+        # world_to_base = SE3.Rt(matrix_from_quat(self._active_arm._base_pose.orientation), self._active_arm._base_pose.position)
+        # active_world_to_ee = (world_to_base * base_to_ee).squeeze()
+        # world_to_base2 = self._active_arm._base_pose
+        # world_to_ee2 = multiply_poses(self._active_arm._base_pose, Pose(base_to_ee))
+
+        # passive_q = self._passive_arm.get_joint_positions()
+        # base_to_ee = []
+        # for i in range(len(self._sympy_passive_fk_equation)):
+        #     line = str(self._sympy_passive_fk_equation[i])
+        #     for j in range(2):
+        #         line = line.replace(f"q_{j}", f"{passive_q[j]}")
+        #     result = eval(line)
+        #     base_to_ee.append(result)
+        # world_to_base = SE3.Rt(matrix_from_quat(self._passive_arm._base_pose.orientation), self._passive_arm._base_pose.position)
+        # passive_world_to_ee = (world_to_base * base_to_ee).squeeze()
+
+        # world_to_base2 = self._passive_arm._base_pose
+        # world_to_ee2 = multiply_poses(self._passive_arm._base_pose, Pose(base_to_ee))
+
+        # visualize_pose(Pose(world_to_ee), self._active_arm.physics_client_id)
+        # while True:
+        #     p.stepSimulation()
                   
 
     def step(self, torque: list[float]) -> None:
@@ -73,6 +104,7 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
         solver = SnoptSolver()
         result = solver.Solve(program)
         assert result.is_success()
+        print(result.get_optimal_cost())
 
         self._active_arm.set_joints(result.GetSolution(next_active_q), joint_velocities=result.GetSolution(next_active_qd))
         self._passive_arm.set_joints(result.GetSolution(next_passive_q), joint_velocities=result.GetSolution(next_passive_qd))
@@ -118,7 +150,9 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
                 line = line.replace(f"q_{j}", f"next_active_q[{j}]")
             drake_expression = eval(line)
             drake_active_fk.append(drake_expression)
-        program.AddConstraint(eq(next_active_ee, drake_active_fk))
+        se3 = SE3.Rt(matrix_from_quat(self._active_arm._base_pose.orientation), self._active_arm._base_pose.position)
+        transformed_next_active_ee = (se3.inv() * next_active_ee).squeeze()
+        program.AddConstraint(eq(transformed_next_active_ee, drake_active_fk))
 
         # Passive forward kinematics.
         drake_passive_fk = []
@@ -128,7 +162,9 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
                 line = line.replace(f"q_{j}", f"next_passive_q[{j}]")
             drake_expression = eval(line)
             drake_passive_fk.append(drake_expression)
-        program.AddConstraint(eq(next_passive_ee, drake_passive_fk))
+        se3 = SE3.Rt(matrix_from_quat(self._passive_arm._base_pose.orientation), self._passive_arm._base_pose.position)
+        transformed_next_passive_ee = (se3.inv() * next_passive_ee).squeeze()
+        program.AddConstraint(eq(transformed_next_passive_ee, drake_passive_fk))
             
         # TODO handle orientation!
         drake_ee = []
