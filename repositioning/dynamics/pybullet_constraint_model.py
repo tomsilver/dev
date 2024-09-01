@@ -19,9 +19,9 @@ class PybulletConstraintRepositioningDynamicsModel(RepositioningDynamicsModel):
         )
         p.createConstraint(
             self._active_arm.robot_id,
-            self._active_arm.tool_link_id,
+            self._active_arm.end_effector_id,
             self._passive_arm.robot_id,
-            self._passive_arm.tool_link_id,
+            self._passive_arm.end_effector_id,
             jointType=p.JOINT_FIXED,
             jointAxis=[0, 0, 0],
             parentFramePosition=[0, 0, 0],
