@@ -6,6 +6,7 @@ from typing import Any, Callable
 
 import imageio.v2 as iio
 import numpy as np
+import pybullet as p
 from pybullet_helpers.camera import capture_image
 from pybullet_helpers.geometry import Pose
 from pybullet_helpers.gui import create_gui_connection
@@ -53,7 +54,7 @@ def _create_scenario(
         camera_kwargs = {"camera_distance": 2.0, "camera_pitch": -60}
         physics_client_id = create_gui_connection(**camera_kwargs)
 
-        pad = 0.0 # add pad to prevent contact forces
+        pad = 0.0  # add pad to prevent contact forces
         active_arm_base_pose = Pose((-np.sqrt(2) - pad, 0.0, 0.0))
         active_arm_home_joint_positions = [-np.pi / 4, np.pi / 2]
         active_arm = TwoLinkPyBulletRobot(
@@ -117,12 +118,12 @@ def _create_scenario(
         robot.set_joints(robot_init_joints)
         human.set_joints(human_init_joints)
 
+        # Make consistent with Eric test.
+        np.random.seed(1)
+
         def _torque_fn(t: float) -> list[float]:
-            if t < 0.5:
-                return [0.1, 0.0, 0.0, 0.01, 0.0, 0.0]
-            if t < 1:
-                return [-0.1, 0.0, 0.0, 0.01, 0.0, 0.0]
-            return [0.0] * 6
+            torque = (np.random.sample((6, 1)) - np.ones((6, 1)) * 0.5) * 20.0
+            return list(torque.squeeze())
 
         return robot, human, _torque_fn, camera_kwargs
 
@@ -130,8 +131,8 @@ def _create_scenario(
 
 
 def _main(scenario: str, dynamics: str, make_video: bool, video_dt: float) -> None:
-    dt = 1e-3
-    T = 5.0
+    dt = 1 / 240
+    T = 1000 * dt
     t = 0.0
 
     active_arm, passive_arm, torque_fn, camera_kwargs = _create_scenario(scenario)
