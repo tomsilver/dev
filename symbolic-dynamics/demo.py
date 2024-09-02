@@ -6,7 +6,7 @@ from roboticstoolbox.robot.Robot import Robot as RTBRobot
 import spatialmath.base as base
 import time
 import numpy as np
-from sympy import expand, collect, sympify, Array, solve, cos, sin
+from sympy import expand, collect, sympify, Array, solve, cos, sin, simplify
 import pybullet as p
 import dill
 
@@ -24,29 +24,46 @@ import dill
 
 # rtb_robot = rtb.models.DH.Panda()
 # rtb_robot._symbolic = True
+# robot_name = "panda_dh_7d0f"
 
-rtb_robot = rtb.models.DH.Puma560(symbolic=True)
+rtb_robot = rtb.models.DH.TwoLink()
+rtb_robot._symbolic = True
+robot_name = "two_link"
+
+# disabling gravity
+rtb_robot.gravity = [0.0, 0.0, 0.0]
+
+# rtb_robot = rtb.models.DH.Puma560(symbolic=True)
+# robot_name = "panda"
 
 q0 = base.sym.symbol(f"q_:{rtb_robot.n}")
 qd0 = base.sym.symbol(f"qd_:{rtb_robot.n}")
 
-# J = rtb_robot.jacob0(q0)
-# M = rtb_robot.inertia(q0)
-# C = rtb_robot.coriolis(q0, qd0)
-# g = rtb_robot.gravload(q0)
+# Forward kinematics
+ee = rtb_robot.fkine(q0)
+# TODO handle rotations
 
-Mfilename = "puma_M.p"
-Cfilename = "puma_C.p"
-gfilename = "puma_g.p"
-equation_filename = "puma_equation.p"
-simplified_equation_filename = "puma_equation_simplified.p"
+eefilename = f"{robot_name}_ee.p"
+with open(eefilename, "wb") as f:
+    dill.dump([ee.x, ee.y, ee.z], f)
 
-# with open(Mfilename, "wb") as f:
-#     dill.dump(M, f)
-# with open(Cfilename, "wb") as f:
-#     dill.dump(C, f)
-# with open(gfilename, "wb") as f:
-#     dill.dump(g, f)
+M = rtb_robot.inertia(q0)
+C = rtb_robot.coriolis(q0, qd0)
+g = rtb_robot.gravload(q0)
+
+
+Mfilename = f"{robot_name}_M.p"
+Cfilename = f"{robot_name}_C.p"
+gfilename = f"{robot_name}_g.p"
+equation_filename = f"{robot_name}_equation.p"
+simplified_equation_filename = f"{robot_name}_equation_simplified.p"
+
+with open(Mfilename, "wb") as f:
+    dill.dump(M, f)
+with open(Cfilename, "wb") as f:
+    dill.dump(C, f)
+with open(gfilename, "wb") as f:
+    dill.dump(g, f)
 
 with open(Mfilename, "rb") as f:
     M = dill.load(f)
@@ -59,10 +76,10 @@ qdd0 = base.sym.symbol(f"qdd_:{rtb_robot.n}")
 tau0 = base.sym.symbol(f"tau_:{rtb_robot.n}")
 
 # Manipulator equation
-# equation =  M @ qdd0 + C @ qd0 - (tau0 + g)
+equation =  M @ qdd0 + C @ qd0 - (tau0 + g)
 
-# with open(equation_filename, "wb") as f:
-#     dill.dump(equation, f)
+with open(equation_filename, "wb") as f:
+    dill.dump(equation, f)
 
 with open(equation_filename, "rb") as f:
     equation = dill.load(f)
@@ -75,7 +92,9 @@ with open(equation_filename, "rb") as f:
 #         common_terms.append(cos(v[i]))
 
 # simplified_equation = [collect(l, common_terms) for l in equation]
-
+simplified_equation = [simplify(l) for l in equation]
+for eq in simplified_equation:
+    print(eq)
 # with open(simplified_equation_filename, "wb") as f:
 #     dill.dump(simplified_equation, f)
 

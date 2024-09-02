@@ -185,6 +185,6 @@ class SNOPTRepositioningDynamicsModel(RepositioningDynamicsModel):
         program.AddConstraint(eq(next_active_qd, active_qd + active_qdd * self._dt))
         program.AddConstraint(eq(next_active_q, active_q + next_active_qd * self._dt))
         # NOTE: commenting this next line out helps...
-        program.AddConstraint(eq(next_passive_qd, passive_qd + passive_qdd * self._dt))
+        # program.AddConstraint(eq(next_passive_qd, passive_qd + passive_qdd * self._dt))
         program.AddConstraint(eq(next_passive_q, passive_q + next_passive_qd * self._dt))
 
