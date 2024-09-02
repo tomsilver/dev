@@ -54,7 +54,7 @@ def _create_scenario(
         camera_kwargs = {"camera_distance": 2.0, "camera_pitch": -60}
         physics_client_id = create_gui_connection(**camera_kwargs)
 
-        pad = 0.0  # add pad to prevent contact forces
+        pad = 0.01  # add pad to prevent contact forces
         active_arm_base_pose = Pose((-np.sqrt(2) - pad, 0.0, 0.0))
         active_arm_home_joint_positions = [-np.pi / 4, np.pi / 2]
         active_arm = TwoLinkPyBulletRobot(
@@ -71,12 +71,10 @@ def _create_scenario(
             home_joint_positions=passive_arm_home_joint_positions,
         )
 
+        rng = np.random.default_rng(0)
+
         def _torque_fn(t: float) -> list[float]:
-            if t < 0.25:
-                return [1, -1]
-            if t < 0.5:
-                return [-1, 1]
-            return [0.0, 0.0]
+            return list(rng.uniform(-10, 10, size=2))
 
         return active_arm, passive_arm, _torque_fn, camera_kwargs
 
