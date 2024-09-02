@@ -175,9 +175,9 @@ def _main(scenario: str, dynamics: str, make_video: bool, video_dt: float) -> No
                 robot.robot_id, joint, 0, 0, physicsClientId=robot.physics_client_id
             )
 
-        # Let the simulation settle.
-        for i in range(1000):
-            p.stepSimulation(physicsClientId=robot.physics_client_id)
+    # Let the simulation settle.
+    for i in range(1000):
+        p.stepSimulation(physicsClientId=robot.physics_client_id)
 
     if make_video:
         imgs = [capture_image(active_arm.physics_client_id, **camera_kwargs)]

@@ -35,7 +35,7 @@ class MathRepositioningDynamicsModel(RepositioningDynamicsModel):
         Nr = self._calculate_N_vector(self._active_arm)
         Nh = self._calculate_N_vector(self._passive_arm)
 
-        acc_r = np.linalg.inv((Jhinv @ R @ -Jr).T @ Mh @ (Jhinv @ R @ Jr) - Mr) @ (
+        acc_r = np.linalg.pinv((Jhinv @ R @ -Jr).T @ Mh @ (Jhinv @ R @ Jr) - Mr) @ (
             (Jhinv @ R @ Jr).T
             @ (
                 Mh * (1 / self._dt) @ (Jhinv @ R @ Jr) @ vel_r
@@ -103,8 +103,8 @@ class MathRepositioningDynamicsModel(RepositioningDynamicsModel):
     def _get_active_to_passive_ee_twist(
         active_arm: SingleArmPyBulletRobot, passive_arm: SingleArmPyBulletRobot
     ) -> NDArray:
-        active_ee_orn = active_arm.get_end_effector_pose().orientation
-        passive_ee_orn = passive_arm.get_end_effector_pose().orientation
+        active_ee_orn = active_arm._base_pose.orientation
+        passive_ee_orn = passive_arm._base_pose.orientation
         active_to_passive_ee = matrix_from_quat(passive_ee_orn).T @ matrix_from_quat(
             active_ee_orn
         )
