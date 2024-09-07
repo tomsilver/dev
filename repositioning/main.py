@@ -8,12 +8,13 @@ import pybullet as p
 
 from dynamics import create_dynamics_model
 from envs import create_env
-from planners.random_planner import RandomRepositioningPlanner
+from planners import create_planner
 
 
 def _main(
     env_name: str,
     dynamics_name: str,
+    planner_name: str,
     num_steps: int,
     make_video: bool,
     seed: int = 0,
@@ -30,7 +31,8 @@ def _main(
     dynamics_model = create_dynamics_model(
         dynamics_name, sim_physics_client_id, scene_config
     )
-    planner = RandomRepositioningPlanner(
+    planner = create_planner(
+        planner_name,
         scene_config=scene_config,
         dynamics=dynamics_model,
         seed=seed,
@@ -50,7 +52,9 @@ def _main(
             imgs.append(env.render())
 
     if make_video:
-        video_outfile = video_dir / f"{env_name}_{dynamics_name}_{seed}.mp4"
+        video_outfile = (
+            video_dir / f"{env_name}_{dynamics_name}_{planner_name}_{seed}.mp4"
+        )
         iio.mimsave(video_outfile, imgs, fps=video_fps)
         print(f"Wrote out to {video_outfile}")
 
@@ -61,10 +65,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="panda-human")
     parser.add_argument("--dynamics", type=str, default="math")
+    parser.add_argument("--planner", type=str, default="predictive-sampling")
     parser.add_argument("--num_steps", type=int, default=1000)
     parser.add_argument("--make_video", action="store_true")
     parser.add_argument("--seed", type=int, default=0)
 
     args = parser.parse_args()
 
-    _main(args.env, args.dynamics, args.num_steps, args.make_video, seed=args.seed)
+    _main(
+        args.env,
+        args.dynamics,
+        args.planner,
+        args.num_steps,
+        args.make_video,
+        seed=args.seed,
+    )
