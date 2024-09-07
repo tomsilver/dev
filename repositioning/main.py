@@ -49,7 +49,7 @@ def _main(
             imgs.append(env.render())
 
     if make_video:
-        video_outfile = video_dir / f"{env_name}_{dynamics_name}.mp4"
+        video_outfile = video_dir / f"{env_name}_{dynamics_name}_{seed}.mp4"
         iio.mimsave(video_outfile, imgs, fps=video_fps)
         print(f"Wrote out to {video_outfile}")
 
