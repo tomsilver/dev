@@ -2,13 +2,13 @@
 
 import abc
 
+import pybullet as p
 from pybullet_helpers.camera import capture_image
 from pybullet_helpers.gui import create_gui_connection
 
-from dynamics import create_dynamics_model
-from dynamics.base_model import RepositioningDynamicsModel
-from structs import (Image, JointTorques, RepositioningSceneConfig,
-                     RepositioningState)
+from dynamics import create_dynamics_model, create_robot
+from structs import (Image, JointTorques, RepositioningGoal,
+                     RepositioningSceneConfig, RepositioningState)
 
 from .repositioning_env import RepositioningEnv
 
@@ -37,6 +37,28 @@ class DynamicsModelEnv(RepositioningEnv):
             dynamics_name, self._physics_client_id, self._scene_config
         )
 
+        # Visualize the passive arm target.
+        goal_passive_arm = create_robot(
+            scene_config.passive_name,
+            self._physics_client_id,
+            scene_config.passive_base_pose,
+            scene_config.passive_goal_joint_positions,
+        )
+        for joint in goal_passive_arm.arm_joints:
+            p.changeVisualShape(
+                goal_passive_arm.robot_id,
+                joint,
+                rgbaColor=[0.0, 1.0, 0.0, 0.5],
+                physicsClientId=self._physics_client_id,
+            )
+            p.setCollisionFilterGroupMask(
+                goal_passive_arm.robot_id,
+                joint,
+                0,
+                0,
+                physicsClientId=self._physics_client_id,
+            )
+
     @abc.abstractmethod
     def _get_default_scene_config(self) -> RepositioningSceneConfig:
         """Subclasses should define a default scene config."""
@@ -62,13 +84,8 @@ class DynamicsModelEnv(RepositioningEnv):
             self._scene_config.passive_init_joint_velocities,
         )
 
-    def get_goal(self) -> RepositioningState:
-        return RepositioningState(
-            self._scene_config.active_goal_joint_positions,
-            self._scene_config.active_goal_joint_velocities,
-            self._scene_config.passive_goal_joint_positions,
-            self._scene_config.passive_goal_joint_velocities,
-        )
+    def get_goal(self) -> RepositioningGoal:
+        return self._scene_config.passive_goal_joint_positions
 
     def get_torque_limits(self) -> tuple[JointTorques, JointTorques]:
         return (

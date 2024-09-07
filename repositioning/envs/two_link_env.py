@@ -28,10 +28,7 @@ class TwoLinkRepositioningEnv(DynamicsModelEnv):
         passive_init_joint_velocities = [0.0, 0.0]
 
         # TODO actually set these
-        active_goal_joint_positions = [-np.pi / 4, np.pi / 2]
-        active_goal_joint_velocities = [0.0, 0.0]
         passive_goal_joint_positions = [np.pi / 2 + np.pi / 4, np.pi / 2]
-        passive_goal_joint_velocities = [0.0, 0.0]
 
         torque_lower_limits = [-10.0] * 2
         torque_upper_limits = [10.0] * 2
@@ -53,10 +50,7 @@ class TwoLinkRepositioningEnv(DynamicsModelEnv):
             active_init_joint_velocities=active_init_joint_velocities,
             passive_init_joint_positions=passive_init_joint_positions,
             passive_init_joint_velocities=passive_init_joint_velocities,
-            active_goal_joint_positions=active_goal_joint_positions,
-            active_goal_joint_velocities=active_goal_joint_velocities,
             passive_goal_joint_positions=passive_goal_joint_positions,
-            passive_goal_joint_velocities=passive_goal_joint_velocities,
             torque_lower_limits=torque_lower_limits,
             torque_upper_limits=torque_upper_limits,
             camera_target=camera_target,

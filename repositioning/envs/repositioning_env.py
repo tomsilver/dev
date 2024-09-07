@@ -2,8 +2,8 @@
 
 import abc
 
-from structs import (Image, JointTorques, RepositioningSceneConfig,
-                     RepositioningState)
+from structs import (Image, JointTorques, RepositioningGoal,
+                     RepositioningSceneConfig, RepositioningState)
 
 
 class RepositioningEnv(abc.ABC):
@@ -22,7 +22,7 @@ class RepositioningEnv(abc.ABC):
         """Reset the environment to its initial state."""
 
     @abc.abstractmethod
-    def get_goal(self) -> RepositioningState:
+    def get_goal(self) -> RepositioningGoal:
         """Get the goal state."""
 
     @abc.abstractmethod

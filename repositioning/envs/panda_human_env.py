@@ -46,25 +46,14 @@ class PandaHumanRepositioningEnv(DynamicsModelEnv):
         panda_init_joint_velocities = [0.0] * len(panda_init_joint_positions)
         human_init_joint_velocities = [0.0] * len(human_init_joint_positions)
 
-        # TODO: actually set these
-        panda_goal_joint_positions = [
-            0.94578431,
-            -0.89487842,
-            -1.67534487,
-            -0.34826698,
-            1.73607292,
-            0.14233887,
-        ]
         human_goal_joint_positions = [
-            1.43252278,
-            -0.81111486,
-            -0.42373363,
-            0.49931369,
-            -1.17420521,
-            0.37122887,
+            0.5,
+            -0.8,
+            -0.1,
+            0.0,
+            -1.2,
+            0.0,
         ]
-        panda_goal_joint_velocities = [0.0] * len(panda_init_joint_positions)
-        human_goal_joint_velocities = [0.0] * len(human_init_joint_positions)
 
         torque_lower_limits = [-10.0] * 6
         torque_upper_limits = [10.0] * 6
@@ -86,10 +75,7 @@ class PandaHumanRepositioningEnv(DynamicsModelEnv):
             active_init_joint_velocities=panda_init_joint_velocities,
             passive_init_joint_positions=human_init_joint_positions,
             passive_init_joint_velocities=human_init_joint_velocities,
-            active_goal_joint_positions=panda_goal_joint_positions,
-            active_goal_joint_velocities=panda_goal_joint_velocities,
             passive_goal_joint_positions=human_goal_joint_positions,
-            passive_goal_joint_velocities=human_goal_joint_velocities,
             torque_lower_limits=torque_lower_limits,
             torque_upper_limits=torque_upper_limits,
             camera_target=camera_target,

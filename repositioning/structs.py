@@ -10,6 +10,7 @@ from pybullet_helpers.joint import JointPositions, JointVelocities
 
 JointTorques: TypeAlias = list[float]
 Image: TypeAlias = NDArray[np.uint8]
+RepositioningGoal: TypeAlias = JointPositions  # for the passive arm
 
 
 @dataclass
@@ -39,10 +40,7 @@ class RepositioningSceneConfig:
     passive_init_joint_positions: JointPositions
     passive_init_joint_velocities: JointVelocities
 
-    active_goal_joint_positions: JointPositions
-    active_goal_joint_velocities: JointVelocities
     passive_goal_joint_positions: JointPositions
-    passive_goal_joint_velocities: JointVelocities
 
     torque_lower_limits: JointTorques
     torque_upper_limits: JointTorques
