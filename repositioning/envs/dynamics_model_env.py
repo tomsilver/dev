@@ -5,10 +5,11 @@ import abc
 from pybullet_helpers.camera import capture_image
 from pybullet_helpers.gui import create_gui_connection
 
-from ..dynamics import create_dynamics_model
-from ..dynamics.base_model import RepositioningDynamicsModel
-from ..structs import (Image, JointTorques, RepositioningSceneConfig,
-                       RepositioningState)
+from dynamics import create_dynamics_model
+from dynamics.base_model import RepositioningDynamicsModel
+from structs import (Image, JointTorques, RepositioningSceneConfig,
+                     RepositioningState)
+
 from .repositioning_env import RepositioningEnv
 
 
@@ -40,9 +41,17 @@ class DynamicsModelEnv(RepositioningEnv):
     def _get_default_scene_config(self) -> RepositioningSceneConfig:
         """Subclasses should define a default scene config."""
 
-    @property
-    def _dynamics(self) -> RepositioningDynamicsModel:
-        return self._dynamics_model
+    def get_scene_config(self) -> RepositioningSceneConfig:
+        return self._scene_config
+
+    def get_state(self) -> RepositioningState:
+        return self._dynamics_model.get_state()
+
+    def reset(self, state: RepositioningState) -> None:
+        self._dynamics_model.reset(state)
+
+    def step(self, action: JointTorques) -> None:
+        self._dynamics_model.step(action)
 
     @property
     def _initial_state(self) -> RepositioningState:
@@ -63,8 +72,8 @@ class DynamicsModelEnv(RepositioningEnv):
 
     def get_torque_limits(self) -> tuple[JointTorques, JointTorques]:
         return (
-            self._scene_config.lower_torque_limits,
-            self._scene_config.upper_torque_limits,
+            self._scene_config.torque_lower_limits,
+            self._scene_config.torque_upper_limits,
         )
 
     def render(self) -> Image:

@@ -3,7 +3,8 @@
 import pybullet as p
 from pybullet_helpers.geometry import multiply_poses
 
-from ..structs import JointTorques, RepositioningState
+from structs import JointTorques, RepositioningState
+
 from .base_model import RepositioningDynamicsModel
 
 

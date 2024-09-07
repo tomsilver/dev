@@ -5,13 +5,13 @@ from .repositioning_env import RepositioningEnv
 from .two_link_env import TwoLinkRepositioningEnv
 
 
-def create_env(name: str) -> RepositioningEnv:
+def create_env(name: str, *args, **kwargs) -> RepositioningEnv:
     """Helper function for creating environments."""
 
     if name == "panda-human":
-        return PandaHumanRepositioningEnv()
+        return PandaHumanRepositioningEnv(*args, **kwargs)
 
     if name == "two-link":
-        return TwoLinkRepositioningEnv()
+        return TwoLinkRepositioningEnv(*args, **kwargs)
 
     raise NotImplementedError

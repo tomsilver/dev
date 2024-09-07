@@ -1,14 +1,16 @@
 """Helper function to create dynamics models."""
 
+import numpy as np
 import pybullet as p
 from pybullet_helpers.geometry import Pose
 from pybullet_helpers.joint import JointPositions
 from pybullet_helpers.robots import create_pybullet_robot
 from pybullet_helpers.robots.single_arm import SingleArmPyBulletRobot
 
-from ..robots.human import HumanArm6DoF
-from ..robots.panda import PandaPybulletRobotLimbRepo
-from ..structs import RepositioningSceneConfig
+from robots.human import HumanArm6DoF
+from robots.panda import PandaPybulletRobotLimbRepo
+from structs import RepositioningSceneConfig
+
 from .base_model import RepositioningDynamicsModel
 from .math_model import MathRepositioningDynamicsModel
 from .pybullet_constraint_model import \
@@ -44,10 +46,21 @@ def create_dynamics_model(
 ) -> RepositioningDynamicsModel:
     """Helper function to create dynamics models."""
 
+    assert np.allclose(scene_config.active_init_joint_velocities, 0.0)
+    assert np.allclose(scene_config.passive_init_joint_velocities, 0.0)
+
     active_arm = create_robot(
-        scene_config.active_name, physics_client_id, scene_config.active_base_pose
+        scene_config.active_name,
+        physics_client_id,
+        scene_config.active_base_pose,
+        scene_config.active_goal_joint_positions,
     )
-    passive_arm = create_robot(scene_config.passive_name)
+    passive_arm = create_robot(
+        scene_config.passive_name,
+        physics_client_id,
+        scene_config.passive_base_pose,
+        scene_config.active_init_joint_positions,
+    )
     dt = scene_config.dt
 
     if name == "math":

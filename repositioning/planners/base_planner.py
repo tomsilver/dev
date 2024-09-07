@@ -2,15 +2,25 @@
 
 import abc
 
-from ..dynamics.base_model import RepositioningDynamicsModel
-from ..structs import JointTorques, RepositioningState
+import numpy as np
+
+from dynamics.base_model import RepositioningDynamicsModel
+from structs import JointTorques, RepositioningSceneConfig, RepositioningState
 
 
 class RepositioningPlanner(abc.ABC):
     """Base class for repositioning planner."""
 
-    def __init__(self, dynamics: RepositioningDynamicsModel) -> None:
+    def __init__(
+        self,
+        scene_config: RepositioningSceneConfig,
+        dynamics: RepositioningDynamicsModel,
+        seed: int,
+    ) -> None:
+        self._scene_config = scene_config
         self._dynamics = dynamics
+        self._seed = seed
+        self._rng = np.random.default_rng(seed)
         self._active_arm = dynamics.active_arm
         self._passive_arm = dynamics.passive_arm
         self._dt = dynamics.dt

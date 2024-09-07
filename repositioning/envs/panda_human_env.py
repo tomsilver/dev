@@ -4,7 +4,8 @@ import numpy as np
 from pybullet_helpers.geometry import Pose
 from scipy.spatial.transform import Rotation
 
-from ..structs import RepositioningSceneConfig
+from structs import RepositioningSceneConfig
+
 from .dynamics_model_env import DynamicsModelEnv
 
 

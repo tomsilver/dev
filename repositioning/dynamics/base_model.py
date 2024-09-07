@@ -6,7 +6,7 @@ import numpy as np
 import pybullet as p
 from pybullet_helpers.robots.single_arm import SingleArmPyBulletRobot
 
-from ..structs import JointTorques, RepositioningState
+from structs import JointTorques, RepositioningState
 
 
 class RepositioningDynamicsModel(abc.ABC):

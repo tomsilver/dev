@@ -2,8 +2,8 @@
 
 import abc
 
-from ..structs import (Image, JointTorques, RepositioningSceneConfig,
-                       RepositioningState)
+from structs import (Image, JointTorques, RepositioningSceneConfig,
+                     RepositioningState)
 
 
 class RepositioningEnv(abc.ABC):
