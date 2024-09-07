@@ -11,6 +11,8 @@ from .random_planner import RandomRepositioningPlanner
 def create_planner(
     name: str,
     scene_config: RepositioningSceneConfig,
+    T: float,
+    dt: float,
     dynamics: RepositioningDynamicsModel,
     seed: int,
 ) -> RepositioningPlanner:
@@ -19,13 +21,15 @@ def create_planner(
     if name == "random":
         return RandomRepositioningPlanner(
             scene_config=scene_config,
+            T=T,
+            dt=dt,
             dynamics=dynamics,
             seed=seed,
         )
 
     if name == "predictive-sampling":
         return PredictiveSamplingPlanner(
-            scene_config=scene_config, dynamics=dynamics, seed=seed
+            scene_config=scene_config, T=T, dt=dt, dynamics=dynamics, seed=seed
         )
 
     raise NotImplementedError

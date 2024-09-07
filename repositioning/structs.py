@@ -30,8 +30,6 @@ class RepositioningSceneConfig:
     active_name: str
     passive_name: str
 
-    dt: float
-
     active_base_pose: Pose
     passive_base_pose: Pose
 

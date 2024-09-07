@@ -17,8 +17,6 @@ class PandaHumanRepositioningEnv(DynamicsModelEnv):
         active_name = "panda-limb-repo"
         passive_name = "human-arm-6dof"
 
-        dt = 1 / 240
-
         robot_init_pos = (0.8, -0.1, 0.5)
         human_init_pos = (0.15, 0.1, 1.4)
 
@@ -68,7 +66,6 @@ class PandaHumanRepositioningEnv(DynamicsModelEnv):
         return RepositioningSceneConfig(
             active_name=active_name,
             passive_name=passive_name,
-            dt=dt,
             active_base_pose=robot_base_pose,
             passive_base_pose=human_base_pose,
             active_init_joint_positions=panda_init_joint_positions,

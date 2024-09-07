@@ -15,7 +15,8 @@ def _main(
     env_name: str,
     dynamics_name: str,
     planner_name: str,
-    num_steps: int,
+    T: float,
+    dt: float,
     make_video: bool,
     seed: int = 0,
     render_interval: int = 10,
@@ -25,16 +26,21 @@ def _main(
     video_dir = Path(__file__).parent / "videos"
     os.makedirs(video_dir, exist_ok=True)
 
-    env = create_env(env_name, dynamics_name)
+    env = create_env(env_name, dynamics_name, dt)
     scene_config = env.get_scene_config()
     sim_physics_client_id = p.connect(p.DIRECT)
     dynamics_model = create_dynamics_model(
-        dynamics_name, sim_physics_client_id, scene_config
+        dynamics_name,
+        sim_physics_client_id,
+        scene_config,
+        dt,
     )
     planner = create_planner(
         planner_name,
         scene_config=scene_config,
         dynamics=dynamics_model,
+        T=T,
+        dt=dt,
         seed=seed,
     )
     init_state = env.get_state()
@@ -44,7 +50,11 @@ def _main(
     if make_video:
         imgs = [env.render()]
 
-    for i in range(num_steps):
+    t = 0.0
+    i = 0
+    while t < T:
+        t += dt
+        i += 1
         state = env.get_state()
         action = planner.step(state)
         env.step(action)
@@ -66,7 +76,8 @@ if __name__ == "__main__":
     parser.add_argument("--env", type=str, default="panda-human")
     parser.add_argument("--dynamics", type=str, default="math")
     parser.add_argument("--planner", type=str, default="predictive-sampling")
-    parser.add_argument("--num_steps", type=int, default=1000)
+    parser.add_argument("--T", type=int, default=5.0)
+    parser.add_argument("--dt", type=float, default=1 / 240)
     parser.add_argument("--make_video", action="store_true")
     parser.add_argument("--seed", type=int, default=0)
 
@@ -76,7 +87,8 @@ if __name__ == "__main__":
         args.env,
         args.dynamics,
         args.planner,
-        args.num_steps,
+        args.T,
+        args.dt,
         args.make_video,
         seed=args.seed,
     )

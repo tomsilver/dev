@@ -16,8 +16,6 @@ class TwoLinkRepositioningEnv(DynamicsModelEnv):
         active_name = "two-link"
         passive_name = "two-link"
 
-        dt = 1 / 240
-
         pad = 0.01  # add pad to prevent contact forces
         active_base_pose = Pose((-np.sqrt(2) - pad, 0.0, 0.0))
         passive_base_pose = Pose((np.sqrt(2) + pad, 0.0, 0.0))
@@ -43,7 +41,6 @@ class TwoLinkRepositioningEnv(DynamicsModelEnv):
         return RepositioningSceneConfig(
             active_name=active_name,
             passive_name=passive_name,
-            dt=dt,
             active_base_pose=active_base_pose,
             passive_base_pose=passive_base_pose,
             active_init_joint_positions=active_init_joint_positions,

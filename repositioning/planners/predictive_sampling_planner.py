@@ -1,6 +1,8 @@
 """A planner that uses predictive sampling."""
 
 import numpy as np
+from pybullet_helpers.joint import JointPositions
+from pybullet_helpers.trajectory import Trajectory
 
 from structs import JointTorques, RepositioningGoal, RepositioningState
 
@@ -22,13 +24,16 @@ class PredictiveSamplingPlanner(RepositioningPlanner):
         self._num_rollouts = num_rollouts
         self._noise_scale = noise_scale
         self._num_control_points = num_control_points
+        self._current_plan: Trajectory[JointTorques] | None = None
+        self._current_goal: JointPositions | None = None
 
     def reset(
         self,
         initial_state: RepositioningState,
         goal: RepositioningGoal,
     ) -> None:
-        pass
+        self._current_plan = self._get_initialization()
+        self._current_goal = goal
 
     def step(self, state: RepositioningState) -> JointTorques:
         lower = self._scene_config.torque_lower_limits
@@ -43,3 +48,6 @@ class PredictiveSamplingPlanner(RepositioningPlanner):
         )
         action = norm_action * scale + shift
         return action.tolist()
+    
+    def _get_initialization(self) -> Trajectory[JointTorques]:
+        import ipdb; ipdb.set_trace()

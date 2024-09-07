@@ -19,6 +19,7 @@ class DynamicsModelEnv(RepositioningEnv):
     def __init__(
         self,
         dynamics_name: str,
+        dt: float,
         scene_config: RepositioningSceneConfig | None = None,
         *args,
         **kwargs
@@ -34,7 +35,7 @@ class DynamicsModelEnv(RepositioningEnv):
             camera_pitch=self._scene_config.camera_pitch,
         )
         self._dynamics_model = create_dynamics_model(
-            dynamics_name, self._physics_client_id, self._scene_config
+            dynamics_name, self._physics_client_id, self._scene_config, dt
         )
 
         # Visualize the passive arm target.

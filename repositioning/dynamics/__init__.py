@@ -43,6 +43,7 @@ def create_dynamics_model(
     name: str,
     physics_client_id: int,
     scene_config: RepositioningSceneConfig,
+    dt: float,
 ) -> RepositioningDynamicsModel:
     """Helper function to create dynamics models."""
 
@@ -61,7 +62,6 @@ def create_dynamics_model(
         scene_config.passive_base_pose,
         scene_config.passive_init_joint_positions,
     )
-    dt = scene_config.dt
 
     if name == "math":
         return MathRepositioningDynamicsModel(active_arm, passive_arm, dt)
