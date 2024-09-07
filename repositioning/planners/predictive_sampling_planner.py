@@ -19,6 +19,7 @@ class PredictiveSamplingPlanner(RepositioningPlanner):
         num_rollouts: int = 10,
         noise_scale: float = 1.0,
         num_control_points: int = 10,
+        replan_dt: float = 1e-2,
         *args,
         **kwargs
     ) -> None:
@@ -26,6 +27,7 @@ class PredictiveSamplingPlanner(RepositioningPlanner):
         self._num_rollouts = num_rollouts
         self._noise_scale = noise_scale
         self._num_control_points = num_control_points
+        self._replan_dt = replan_dt
         self._num_active_dof = len(self._active_arm.arm_joints)
         self._passive_joint_infos = get_joint_infos(
             self._passive_arm.robot_id,
@@ -48,15 +50,21 @@ class PredictiveSamplingPlanner(RepositioningPlanner):
         nominal = self._current_plan.get_sub_trajectory(
             self._dt, self._current_plan.duration
         )
-        sample_list: list[Trajectory[JointTorques]] = [nominal]
-        # Sample new candidates around the nominal trajectory.
-        num_samples = self._num_rollouts - len(sample_list)
-        new_samples = self._sample_from_nominal(nominal, num_samples)
-        sample_list.extend(new_samples)
-        # Pick the best one.
-        self._current_plan = min(
-            sample_list, key=lambda s: self._score_trajectory(s, state)
-        )
+        # Check if it's time to replan.
+        if (nominal.duration // self._replan_dt) == (
+            (nominal.duration + self._dt) // self._replan_dt
+        ):
+            self._current_plan = nominal
+        else:
+            sample_list: list[Trajectory[JointTorques]] = [nominal]
+            # Sample new candidates around the nominal trajectory.
+            num_samples = self._num_rollouts - len(sample_list)
+            new_samples = self._sample_from_nominal(nominal, num_samples)
+            sample_list.extend(new_samples)
+            # Pick the best one.
+            self._current_plan = min(
+                sample_list, key=lambda s: self._score_trajectory(s, state)
+            )
         # Return just the first action.
         return self._current_plan[0.0]
 
