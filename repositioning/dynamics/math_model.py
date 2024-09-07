@@ -6,8 +6,8 @@ from numpy.typing import NDArray
 from pybullet_helpers.geometry import matrix_from_quat
 from pybullet_helpers.robots.single_arm import SingleArmPyBulletRobot
 
+from ..structs import JointTorques, RepositioningState
 from .base_model import RepositioningDynamicsModel
-from ..structs import RepositioningState, JointTorques
 
 
 class MathRepositioningDynamicsModel(RepositioningDynamicsModel):
@@ -27,7 +27,9 @@ class MathRepositioningDynamicsModel(RepositioningDynamicsModel):
         active_velocities = self.active_arm.get_joint_velocities()
         passive_positions = self.passive_arm.get_joint_positions()
         passive_velocities = self.passive_arm.get_joint_velocities()
-        return RepositioningState(active_positions, active_velocities, passive_positions, passive_velocities)
+        return RepositioningState(
+            active_positions, active_velocities, passive_positions, passive_velocities
+        )
 
     def step(self, torque: JointTorques) -> None:
         pos_r = np.array(self.active_arm.get_joint_positions())

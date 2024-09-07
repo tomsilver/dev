@@ -1,7 +1,9 @@
 """Repositioning environment base class."""
 
 import abc
-from ..structs import RepositioningState, JointTorques, RepositioningSceneConfig, Image
+
+from ..structs import (Image, JointTorques, RepositioningSceneConfig,
+                       RepositioningState)
 
 
 class RepositioningEnv(abc.ABC):

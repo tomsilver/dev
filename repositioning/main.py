@@ -1,30 +1,41 @@
 """Experimental script for one robot moving another."""
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 import imageio.v2 as iio
+import pybullet as p
 
 from dynamics import create_dynamics_model
 from envs import create_env
 from planners.random_planner import RandomRepositioningPlanner
-import pybullet as p
 
 
-def _main(env_name: str, dynamics_name: str, num_steps: int, make_video: bool,
-          render_interval: int = 10, video_fps: int = 30) -> None:
-    
+def _main(
+    env_name: str,
+    dynamics_name: str,
+    num_steps: int,
+    make_video: bool,
+    render_interval: int = 10,
+    video_fps: int = 30,
+) -> None:
+
     video_dir = Path(__file__).parent / "videos"
     os.makedirs(video_dir, exist_ok=True)
 
     env = create_env(env_name)
     scene_config = env.get_scene_config()
     sim_physics_client_id = p.connect(p.DIRECT)
-    dynamics_model = create_dynamics_model(dynamics_name, sim_physics_client_id, scene_config)
+    dynamics_model = create_dynamics_model(
+        dynamics_name, sim_physics_client_id, scene_config
+    )
     torque_lower_limits, torque_upper_limits = env.get_torque_limits()
-    planner = RandomRepositioningPlanner(torque_lower_limits, torque_upper_limits,
-                                         random_plan_length=num_steps,
-                                         dynamics=dynamics_model)
+    planner = RandomRepositioningPlanner(
+        torque_lower_limits,
+        torque_upper_limits,
+        random_plan_length=num_steps,
+        dynamics=dynamics_model,
+    )
     init_state = env.get_state()
     goal_state = env.get_goal()
     plan = planner.run(init_state, goal_state)

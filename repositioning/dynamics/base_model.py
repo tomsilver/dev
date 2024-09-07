@@ -2,10 +2,11 @@
 
 import abc
 
-from pybullet_helpers.robots.single_arm import SingleArmPyBulletRobot
-from ..structs import RepositioningState, JointTorques
-import pybullet as p
 import numpy as np
+import pybullet as p
+from pybullet_helpers.robots.single_arm import SingleArmPyBulletRobot
+
+from ..structs import JointTorques, RepositioningState
 
 
 class RepositioningDynamicsModel(abc.ABC):
@@ -61,7 +62,6 @@ class RepositioningDynamicsModel(abc.ABC):
         # Let the simulation settle.
         for _ in range(1000):
             p.stepSimulation(physicsClientId=robot.physics_client_id)
-
 
     @abc.abstractmethod
     def reset(self, state: RepositioningState) -> None:

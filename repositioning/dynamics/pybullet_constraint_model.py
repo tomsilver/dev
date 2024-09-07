@@ -3,8 +3,8 @@
 import pybullet as p
 from pybullet_helpers.geometry import multiply_poses
 
+from ..structs import JointTorques, RepositioningState
 from .base_model import RepositioningDynamicsModel
-from ..structs import RepositioningState, JointTorques
 
 
 class PybulletConstraintRepositioningDynamicsModel(RepositioningDynamicsModel):
@@ -30,7 +30,7 @@ class PybulletConstraintRepositioningDynamicsModel(RepositioningDynamicsModel):
             childFrameOrientation=tf.orientation,
             physicsClientId=self.active_arm.physics_client_id,
         )
-    
+
     def reset(self, state: RepositioningState) -> None:
         self.active_arm.set_joints(state.active_positions, state.active_velocities)
         self.passive_arm.set_joints(state.passive_positions, state.passive_velocities)
@@ -40,7 +40,9 @@ class PybulletConstraintRepositioningDynamicsModel(RepositioningDynamicsModel):
         active_velocities = self.active_arm.get_joint_velocities()
         passive_positions = self.passive_arm.get_joint_positions()
         passive_velocities = self.passive_arm.get_joint_velocities()
-        return RepositioningState(active_positions, active_velocities, passive_positions, passive_velocities)
+        return RepositioningState(
+            active_positions, active_velocities, passive_positions, passive_velocities
+        )
 
     def step(self, torque: JointTorques) -> None:
         # TODO: move this into pybullet helpers.

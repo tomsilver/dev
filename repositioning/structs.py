@@ -1,12 +1,12 @@
 """Common data structures."""
 
 from dataclasses import dataclass
-from pybullet_helpers.joint import JointPositions, JointVelocities
 from typing import TypeAlias
-from pybullet_helpers.geometry import Pose, Pose3D
-from numpy.typing import NDArray
-import numpy as np
 
+import numpy as np
+from numpy.typing import NDArray
+from pybullet_helpers.geometry import Pose, Pose3D
+from pybullet_helpers.joint import JointPositions, JointVelocities
 
 JointTorques: TypeAlias = list[float]
 Image: TypeAlias = NDArray[np.uint8]
@@ -53,4 +53,3 @@ class RepositioningSceneConfig:
 
     image_height: int
     image_width: int
-

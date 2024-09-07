@@ -1,11 +1,11 @@
 """Repositioning environment where a panda is repositioning a human arm."""
 
-from .dynamics_model_env import DynamicsModelEnv
-from ..structs import RepositioningSceneConfig
-
-from scipy.spatial.transform import Rotation
-from pybullet_helpers.geometry import Pose
 import numpy as np
+from pybullet_helpers.geometry import Pose
+from scipy.spatial.transform import Rotation
+
+from ..structs import RepositioningSceneConfig
+from .dynamics_model_env import DynamicsModelEnv
 
 
 class PandaHumanRepositioningEnv(DynamicsModelEnv):
@@ -68,30 +68,32 @@ class PandaHumanRepositioningEnv(DynamicsModelEnv):
         torque_lower_limits = [-10.0] * 6
         torque_upper_limits = [10.0] * 6
 
-        camera_target =  human_init_pos
+        camera_target = human_init_pos
         camera_distance = 1.75
         camera_pitch = -50
 
         image_height = 512
         image_width = 512
 
-        return RepositioningSceneConfig(active_name=active_name,
-                                        passive_name=passive_name,
-                                        dt=dt,
-                                        active_base_pose=robot_base_pose,
-                                        passive_base_pose=human_base_pose,
-                                        active_init_joint_positions=panda_init_joint_positions,
-                                        active_init_joint_velocities=panda_init_joint_velocities,
-                                        passive_init_joint_positions=human_init_joint_positions,
-                                        passive_init_joint_velocities=human_init_joint_velocities,
-                                        active_goal_joint_positions=panda_goal_joint_positions,
-                                        active_goal_joint_velocities=panda_goal_joint_velocities,
-                                        passive_goal_joint_positions=human_goal_joint_positions,
-                                        passive_goal_joint_velocities=human_goal_joint_velocities,
-                                        torque_lower_limits=torque_lower_limits,
-                                        torque_upper_limits=torque_upper_limits,
-                                        camera_target=camera_target,
-                                        camera_distance=camera_distance,
-                                        camera_pitch=camera_pitch,
-                                        image_height=image_height,
-                                        image_width=image_width)
+        return RepositioningSceneConfig(
+            active_name=active_name,
+            passive_name=passive_name,
+            dt=dt,
+            active_base_pose=robot_base_pose,
+            passive_base_pose=human_base_pose,
+            active_init_joint_positions=panda_init_joint_positions,
+            active_init_joint_velocities=panda_init_joint_velocities,
+            passive_init_joint_positions=human_init_joint_positions,
+            passive_init_joint_velocities=human_init_joint_velocities,
+            active_goal_joint_positions=panda_goal_joint_positions,
+            active_goal_joint_velocities=panda_goal_joint_velocities,
+            passive_goal_joint_positions=human_goal_joint_positions,
+            passive_goal_joint_velocities=human_goal_joint_velocities,
+            torque_lower_limits=torque_lower_limits,
+            torque_upper_limits=torque_upper_limits,
+            camera_target=camera_target,
+            camera_distance=camera_distance,
+            camera_pitch=camera_pitch,
+            image_height=image_height,
+            image_width=image_width,
+        )
