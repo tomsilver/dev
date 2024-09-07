@@ -20,6 +20,7 @@ class DynamicsModelEnv(RepositioningEnv):
         self,
         dynamics_name: str,
         dt: float,
+        use_gui: bool,
         scene_config: RepositioningSceneConfig | None = None,
         *args,
         **kwargs
@@ -29,11 +30,15 @@ class DynamicsModelEnv(RepositioningEnv):
             scene_config = self._get_default_scene_config()
         self._scene_config = scene_config
 
-        self._physics_client_id = create_gui_connection(
-            camera_target=self._scene_config.camera_target,
-            camera_distance=self._scene_config.camera_distance,
-            camera_pitch=self._scene_config.camera_pitch,
-        )
+        if use_gui:
+            self._physics_client_id = create_gui_connection(
+                camera_target=self._scene_config.camera_target,
+                camera_distance=self._scene_config.camera_distance,
+                camera_pitch=self._scene_config.camera_pitch,
+            )
+        else:
+            self._physics_client_id = p.connect(p.DIRECT)
+
         self._dynamics_model = create_dynamics_model(
             dynamics_name, self._physics_client_id, self._scene_config, dt
         )

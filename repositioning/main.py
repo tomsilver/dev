@@ -5,11 +5,11 @@ from pathlib import Path
 
 import imageio.v2 as iio
 import pybullet as p
+from tqdm import tqdm
 
 from dynamics import create_dynamics_model
 from envs import create_env
 from planners import create_planner
-from tqdm import tqdm
 
 
 def _main(
@@ -18,6 +18,7 @@ def _main(
     planner_name: str,
     T: float,
     dt: float,
+    use_gui: bool,
     make_video: bool,
     video_fps_scale: float,
     seed: int = 0,
@@ -27,7 +28,7 @@ def _main(
     video_dir = Path(__file__).parent / "videos"
     os.makedirs(video_dir, exist_ok=True)
 
-    env = create_env(env_name, dynamics_name, dt)
+    env = create_env(env_name, dynamics_name, dt, use_gui)
     scene_config = env.get_scene_config()
     sim_physics_client_id = p.connect(p.DIRECT)
     dynamics_model = create_dynamics_model(
@@ -82,6 +83,7 @@ if __name__ == "__main__":
     parser.add_argument("--planner", type=str, default="predictive-sampling")
     parser.add_argument("--T", type=float, default=1.0)
     parser.add_argument("--dt", type=float, default=1 / 240)
+    parser.add_argument("--use_gui", action="store_true")
     parser.add_argument("--make_video", action="store_true")
     parser.add_argument("--video_fps_scale", type=float, default=0.025)
     parser.add_argument("--seed", type=int, default=0)
@@ -94,6 +96,7 @@ if __name__ == "__main__":
         args.planner,
         args.T,
         args.dt,
+        args.use_gui,
         args.make_video,
         args.video_fps_scale,
         seed=args.seed,
