@@ -57,6 +57,7 @@ def _main(
         i += 1
         state = env.get_state()
         action = planner.step(state)
+        print(t, action)
         env.step(action)
         if make_video and (i % render_interval == 0):
             imgs.append(env.render())
