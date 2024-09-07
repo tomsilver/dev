@@ -45,11 +45,11 @@ class PandaHumanRepositioningEnv(DynamicsModelEnv):
         human_init_joint_velocities = [0.0] * len(human_init_joint_positions)
 
         human_goal_joint_positions = [
-            0.5,
-            -0.8,
-            -0.1,
-            0.0,
-            -1.2,
+            1.0,
+            -0.7,
+            -0.4,
+            0.2,
+            -1,
             0.0,
         ]
 
