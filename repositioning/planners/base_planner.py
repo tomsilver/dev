@@ -5,7 +5,8 @@ import abc
 import numpy as np
 
 from dynamics.base_model import RepositioningDynamicsModel
-from structs import JointTorques, RepositioningSceneConfig, RepositioningState
+from structs import (JointTorques, RepositioningGoal, RepositioningSceneConfig,
+                     RepositioningState)
 
 
 class RepositioningPlanner(abc.ABC):
@@ -24,27 +25,15 @@ class RepositioningPlanner(abc.ABC):
         self._active_arm = dynamics.active_arm
         self._passive_arm = dynamics.passive_arm
         self._dt = dynamics.dt
-        self._last_plan: list[JointTorques] | None = None  # for warm starting
-
-    def run(
-        self,
-        initial_state: RepositioningState,
-        goal_state: RepositioningState,
-        warm_start: bool = True,
-    ) -> list[JointTorques]:
-        """Return an open-loop plan.
-
-        Note that the planner can be used with MPC by just calling every
-        timestep with warm_start=True.
-        """
-        self._last_plan = self._run(initial_state, goal_state, warm_start=warm_start)
-        return list(self._last_plan)
 
     @abc.abstractmethod
-    def _run(
+    def reset(
         self,
         initial_state: RepositioningState,
-        goal_state: RepositioningState,
-        warm_start: bool = True,
-    ) -> list[JointTorques]:
-        """Implements the planner logic."""
+        goal: RepositioningGoal,
+    ) -> None:
+        """Run planning on a new problem."""
+
+    @abc.abstractmethod
+    def step(self, state: RepositioningState) -> JointTorques:
+        """Get the next action to execute in the given state."""

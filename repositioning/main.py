@@ -31,19 +31,20 @@ def _main(
         dynamics_name, sim_physics_client_id, scene_config
     )
     planner = RandomRepositioningPlanner(
-        random_plan_length=num_steps,
         scene_config=scene_config,
         dynamics=dynamics_model,
         seed=seed,
     )
     init_state = env.get_state()
     goal_state = env.get_goal()
-    plan = planner.run(init_state, goal_state)
+    planner.reset(init_state, goal_state)
 
     if make_video:
         imgs = [env.render()]
 
-    for i, action in enumerate(plan):
+    for i in range(num_steps):
+        state = env.get_state()
+        action = planner.step(state)
         env.step(action)
         if make_video and (i % render_interval == 0):
             imgs.append(env.render())
