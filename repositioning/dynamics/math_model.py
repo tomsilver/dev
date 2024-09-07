@@ -7,6 +7,7 @@ from pybullet_helpers.geometry import matrix_from_quat
 from pybullet_helpers.robots.single_arm import SingleArmPyBulletRobot
 
 from .base_model import RepositioningDynamicsModel
+from ..structs import RepositioningState, JointTorques
 
 
 class MathRepositioningDynamicsModel(RepositioningDynamicsModel):
@@ -14,53 +15,63 @@ class MathRepositioningDynamicsModel(RepositioningDynamicsModel):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._active_to_passive_ee_twist = self._get_active_to_passive_ee_twist(
-            self._active_arm, self._passive_arm
+            self.active_arm, self.passive_arm
         )
 
-    def step(self, torque: list[float]) -> None:
+    def reset(self, state: RepositioningState) -> None:
+        self.active_arm.set_joints(state.active_positions, state.active_velocities)
+        self.passive_arm.set_joints(state.passive_positions, state.passive_velocities)
 
-        pos_r = np.array(self._active_arm.get_joint_positions())
-        pos_h = np.array(self._passive_arm.get_joint_positions())
-        vel_r = np.array(self._active_arm.get_joint_velocities())
-        vel_h = np.array(self._passive_arm.get_joint_velocities())
+    def get_state(self) -> RepositioningState:
+        active_positions = self.active_arm.get_joint_positions()
+        active_velocities = self.active_arm.get_joint_velocities()
+        passive_positions = self.passive_arm.get_joint_positions()
+        passive_velocities = self.passive_arm.get_joint_velocities()
+        return RepositioningState(active_positions, active_velocities, passive_positions, passive_velocities)
+
+    def step(self, torque: JointTorques) -> None:
+        pos_r = np.array(self.active_arm.get_joint_positions())
+        pos_h = np.array(self.passive_arm.get_joint_positions())
+        vel_r = np.array(self.active_arm.get_joint_velocities())
+        vel_h = np.array(self.passive_arm.get_joint_velocities())
         R = self._active_to_passive_ee_twist
 
-        Jr = self._calculate_jacobian(self._active_arm)
-        Jh = self._calculate_jacobian(self._passive_arm)
+        Jr = self._calculate_jacobian(self.active_arm)
+        Jh = self._calculate_jacobian(self.passive_arm)
         Jhinv = np.linalg.pinv(Jh)
 
-        Mr = self._calculate_mass_matrix(self._active_arm)
-        Mh = self._calculate_mass_matrix(self._passive_arm)
+        Mr = self._calculate_mass_matrix(self.active_arm)
+        Mh = self._calculate_mass_matrix(self.passive_arm)
 
-        Nr = self._calculate_N_vector(self._active_arm)
-        Nh = self._calculate_N_vector(self._passive_arm)
+        Nr = self._calculate_N_vector(self.active_arm)
+        Nh = self._calculate_N_vector(self.passive_arm)
 
         acc_r = np.linalg.pinv((Jhinv @ R @ -Jr).T @ Mh @ (Jhinv @ R @ Jr) - Mr) @ (
             (Jhinv @ R @ Jr).T
             @ (
-                Mh * (1 / self._dt) @ (Jhinv @ R @ Jr) @ vel_r
-                - Mh * (1 / self._dt) @ vel_h
+                Mh * (1 / self.dt) @ (Jhinv @ R @ Jr) @ vel_r
+                - Mh * (1 / self.dt) @ vel_h
                 + Nh
             )
             + Nr
             - np.array(torque)
         )
 
-        new_vel_r = vel_r + acc_r * self._dt
+        new_vel_r = vel_r + acc_r * self.dt
         r_lin_vel = Jr @ new_vel_r
         h_lin_vel = R @ r_lin_vel
         new_vel_h = Jhinv @ h_lin_vel
 
-        acc_h = (new_vel_h - vel_h) / self._dt
+        acc_h = (new_vel_h - vel_h) / self.dt
 
-        vel_r = vel_r + acc_r * self._dt
-        vel_h = vel_h + acc_h * self._dt
+        vel_r = vel_r + acc_r * self.dt
+        vel_h = vel_h + acc_h * self.dt
 
-        pos_r = pos_r + vel_r * self._dt
-        pos_h = pos_h + vel_h * self._dt
+        pos_r = pos_r + vel_r * self.dt
+        pos_h = pos_h + vel_h * self.dt
 
-        self._active_arm.set_joints(list(pos_r), joint_velocities=list(vel_r))
-        self._passive_arm.set_joints(list(pos_h), joint_velocities=list(vel_h))
+        self.active_arm.set_joints(list(pos_r), joint_velocities=list(vel_r))
+        self.passive_arm.set_joints(list(pos_h), joint_velocities=list(vel_h))
 
     @staticmethod
     def _calculate_jacobian(robot: SingleArmPyBulletRobot) -> NDArray:
