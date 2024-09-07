@@ -14,7 +14,8 @@ from planners import create_planner
 
 def _main(
     env_name: str,
-    dynamics_name: str,
+    sim_dynamics_name: str,
+    real_dynamics_name: str,
     planner_name: str,
     T: float,
     dt: float,
@@ -28,11 +29,11 @@ def _main(
     video_dir = Path(__file__).parent / "videos"
     os.makedirs(video_dir, exist_ok=True)
 
-    env = create_env(env_name, dynamics_name, dt, use_gui)
+    env = create_env(env_name, real_dynamics_name, dt, use_gui)
     scene_config = env.get_scene_config()
     sim_physics_client_id = p.connect(p.DIRECT)
     dynamics_model = create_dynamics_model(
-        dynamics_name,
+        sim_dynamics_name,
         sim_physics_client_id,
         scene_config,
         dt,
@@ -67,7 +68,8 @@ def _main(
 
     if make_video:
         video_outfile = (
-            video_dir / f"{env_name}_{dynamics_name}_{planner_name}_{seed}.mp4"
+            video_dir
+            / f"{env_name}_{sim_dynamics_name}_{real_dynamics_name}_{planner_name}_{seed}.mp4"
         )
         video_fps = (1 / dt) * video_fps_scale
         iio.mimsave(video_outfile, imgs, fps=video_fps)
@@ -79,7 +81,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="panda-human")
-    parser.add_argument("--dynamics", type=str, default="pybullet-constraint")
+    parser.add_argument("--sim_dynamics", type=str, default="pybullet-constraint")
+    parser.add_argument("--real_dynamics", type=str, default="pybullet-constraint")
     parser.add_argument("--planner", type=str, default="predictive-sampling")
     parser.add_argument("--T", type=float, default=1.0)
     parser.add_argument("--dt", type=float, default=1 / 240)
@@ -92,7 +95,8 @@ if __name__ == "__main__":
 
     _main(
         args.env,
-        args.dynamics,
+        args.sim_dynamics,
+        args.real_dynamics,
         args.planner,
         args.T,
         args.dt,
