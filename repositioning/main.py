@@ -9,6 +9,7 @@ import pybullet as p
 from dynamics import create_dynamics_model
 from envs import create_env
 from planners import create_planner
+from tqdm import tqdm
 
 
 def _main(
@@ -18,9 +19,9 @@ def _main(
     T: float,
     dt: float,
     make_video: bool,
+    video_fps_scale: float,
     seed: int = 0,
     render_interval: int = 10,
-    video_fps: int = 30,
 ) -> None:
 
     video_dir = Path(__file__).parent / "videos"
@@ -52,20 +53,22 @@ def _main(
 
     t = 0.0
     i = 0
-    while t < T:
-        t += dt
-        i += 1
-        state = env.get_state()
-        action = planner.step(state)
-        print(t, action)
-        env.step(action)
-        if make_video and (i % render_interval == 0):
-            imgs.append(env.render())
+    with tqdm(total=T) as pbar:
+        while t + 1e-6 < T:
+            t += dt
+            pbar.update(dt)
+            i += 1
+            state = env.get_state()
+            action = planner.step(state)
+            env.step(action)
+            if make_video and (i % render_interval == 0):
+                imgs.append(env.render())
 
     if make_video:
         video_outfile = (
             video_dir / f"{env_name}_{dynamics_name}_{planner_name}_{seed}.mp4"
         )
+        video_fps = (1 / dt) * video_fps_scale
         iio.mimsave(video_outfile, imgs, fps=video_fps)
         print(f"Wrote out to {video_outfile}")
 
@@ -75,11 +78,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="panda-human")
-    parser.add_argument("--dynamics", type=str, default="math")
+    parser.add_argument("--dynamics", type=str, default="pybullet-constraint")
     parser.add_argument("--planner", type=str, default="predictive-sampling")
-    parser.add_argument("--T", type=int, default=5.0)
+    parser.add_argument("--T", type=float, default=1.0)
     parser.add_argument("--dt", type=float, default=1 / 240)
     parser.add_argument("--make_video", action="store_true")
+    parser.add_argument("--video_fps_scale", type=float, default=0.025)
     parser.add_argument("--seed", type=int, default=0)
 
     args = parser.parse_args()
@@ -91,5 +95,6 @@ if __name__ == "__main__":
         args.T,
         args.dt,
         args.make_video,
+        args.video_fps_scale,
         seed=args.seed,
     )

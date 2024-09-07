@@ -17,7 +17,7 @@ class PredictiveSamplingPlanner(RepositioningPlanner):
     def __init__(
         self,
         num_rollouts: int = 10,
-        noise_scale: float = 1e-1,
+        noise_scale: float = 1.0,
         num_control_points: int = 10,
         *args,
         **kwargs
