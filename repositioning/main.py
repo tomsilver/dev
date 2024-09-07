@@ -16,9 +16,9 @@ def _main(
     dynamics_name: str,
     num_steps: int,
     make_video: bool,
+    seed: int = 0,
     render_interval: int = 10,
     video_fps: int = 30,
-    seed: int = 0,
 ) -> None:
 
     video_dir = Path(__file__).parent / "videos"
@@ -66,4 +66,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    _main(args.env, args.dynamics, args.num_steps, args.make_video, args.seed)
+    _main(args.env, args.dynamics, args.num_steps, args.make_video, seed=args.seed)

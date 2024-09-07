@@ -53,13 +53,13 @@ def create_dynamics_model(
         scene_config.active_name,
         physics_client_id,
         scene_config.active_base_pose,
-        scene_config.active_goal_joint_positions,
+        scene_config.active_init_joint_positions,
     )
     passive_arm = create_robot(
         scene_config.passive_name,
         physics_client_id,
         scene_config.passive_base_pose,
-        scene_config.active_init_joint_positions,
+        scene_config.passive_init_joint_positions,
     )
     dt = scene_config.dt
 
