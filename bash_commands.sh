@@ -4,10 +4,11 @@ export BASH_SILENCE_DEPRECATION_WARNING=1
 # make python hashing deterministic
 export PYTHONHASHSEED=0
 
-# pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+# fast downward
+export FD_EXEC_PATH="/Users/tom/downward"
+
+# fast forward
+export FF_PATH="/Users/tom/phd/FF/ff"
 
 # rbenv (ruby)
 eval "$(rbenv init - bash)"
@@ -53,6 +54,20 @@ git-forward() {
   fi
 }
 
+# the typical thing
+git-gg() {
+    git add -u
+    git commit -m wip
+    git push origin HEAD
+}
+
+# no verify
+git-gg-nv() {
+    git add -u
+    git commit -m wip --no-verify
+    git push origin HEAD
+}
+
 # remove unused imports
 remove-imports(){
     autoflake --in-place --remove-all-unused-imports "$@"
@@ -82,8 +97,12 @@ else
 fi
 
 function venv {
-    if [ ! -d venv ]; then
-        virtualenv venv
+    if [ -d .venv ]; then
+        source .venv/bin/activate
+    elif [ -d venv ]; then
+        source venv/bin/activate
+    else
+        uv venv --python=3.11
+        source .venv/bin/activate
     fi
-    source venv/bin/activate
 }
