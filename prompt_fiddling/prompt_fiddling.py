@@ -123,10 +123,10 @@ def _main() -> None:
         help="PDDL domain name to use (default: hiking)"
     )
     parser.add_argument(
-        "--seed",
-        type=str,
-        default="seed0",
-        help="Seed folder to use (default: seed0)"
+        "--num-seeds",
+        type=int,
+        default=3,
+        help="Number of seed folders to use (default: 3, uses seed0, seed1, seed2, etc.)"
     )
     parser.add_argument(
         "--num-prompts",
@@ -140,22 +140,30 @@ def _main() -> None:
     llm = OpenAIModel(args.model, cache)
     print(f"Using model: {args.model}")
     print(f"Using domain: {args.domain}")
-    print(f"Using seed: {args.seed}")
+    print(f"Using {args.num_seeds} seed folders")
     print(f"Generating {args.num_prompts} alternative prompts\n")
 
     pg3_dir = Path(__file__).parent / "third_party" / "pg3"
     domain_file = pg3_dir / f"{args.domain}.pddl"
-    seed_dir = pg3_dir / args.domain / args.seed
 
     with open(domain_file, "r", encoding="utf-8") as f:
         domain_text = f.read()
 
-    # Try both problem*.pddl and task*.pddl patterns
-    problem_files = sorted(list(seed_dir.glob("problem*.pddl")) + list(seed_dir.glob("task*.pddl")))
+    # Collect problems from multiple seed folders
+    problem_files = []
+    for seed_idx in range(args.num_seeds):
+        seed_dir = pg3_dir / args.domain / f"seed{seed_idx}"
+        if not seed_dir.exists():
+            print(f"Warning: {seed_dir} does not exist, skipping")
+            continue
+        seed_problems = sorted(list(seed_dir.glob("problem*.pddl")) + list(seed_dir.glob("task*.pddl")))
+        problem_files.extend(seed_problems)
+        print(f"  Found {len(seed_problems)} problems in seed{seed_idx}")
+
     if not problem_files:
-        print(f"Error: No problem or task files found in {seed_dir}")
+        print(f"Error: No problem or task files found")
         return
-    print(f"Found {len(problem_files)} problems in {seed_dir}\n")
+    print(f"\nTotal: {len(problem_files)} problems across {args.num_seeds} seeds\n")
 
     # Base prompt template
     base_prompt = """Given the following PDDL domain and problem, generate a valid plan to solve it.
