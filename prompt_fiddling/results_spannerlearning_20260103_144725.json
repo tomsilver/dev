@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "model": "gpt-4.1",
+    "domain": "spannerlearning",
+    "num_seeds": 1,
+    "num_prompts": 5,
+    "total_problems": 10,
+    "timestamp": "2026-01-03T14:47:25.935401"
+  },
+  "results": [
+    {
+      "index": 0,
+      "name": "prompt1",
+      "prompt": "You're an AI planner. Given these PDDL domain and problem definitions, think through the planning process step by step, explaining your reasoning at each stage (e.g., selecting actions, resolving preconditions). When you've completed the plan, output only the list of action steps inside <plan></plan> tags, one per line, in standard PDDL action format.\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nExample:\nLet's say the plan is [move a b], [pick c]. Output:\n\n<plan>\n(move a b)\n(pick c)\n</plan>",
+      "successes": 2,
+      "failures": 8,
+      "success_rate": 20.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location3 bob) has an unsatisfied precondition at time 6\n(Set (link gate location3) to true)"
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location5 bob) has an unsatisfied precondition at time 8\n(Set (link gate location5) to true)"
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location3 bob) has an unsatisfied precondition at time 6\n(Set (link gate location3) to true)"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "name": "prompt2",
+      "prompt": "Imagine you are narrating a story where each action taken by an agent in this PDDL problem unfolds step by step. Describe the reasoning and sequence of actions as you go. At the end, summarize the plan actions in PDDL syntax within <plan></plan> tags so they can be extracted for execution.\n\nHere are your materials:\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nBegin storytelling and planning!",
+      "successes": 0,
+      "failures": 10,
+      "success_rate": 0.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location3 bob) has an unsatisfied precondition at time 6\n(Set (link gate location3) to true)"
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location3 bob) has an unsatisfied precondition at time 6\n(Set (link gate location3) to true)"
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location5 bob) has an unsatisfied precondition at time 8\n(Set (link gate location5) to true)"
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location5 bob) has an unsatisfied precondition at time 8\n(Set (link gate location5) to true)"
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location4 bob) has an unsatisfied precondition at time 7\n(Set (link gate location4) to true)"
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": false,
+          "message": "NOTE: (walk gate location3 bob) has an unsatisfied precondition at time 6\n(Set (link gate location3) to true)"
+        }
+      ]
+    }
+  ]
+}

@@ -146,12 +146,6 @@ def _main() -> None:
         help="PDDL domain name to use (default: hiking)"
     )
     parser.add_argument(
-        "--num-seeds",
-        type=int,
-        default=3,
-        help="Number of seed folders to use (default: 3, uses seed0, seed1, seed2, etc.)"
-    )
-    parser.add_argument(
         "--num-prompts",
         type=int,
         default=5,
@@ -185,31 +179,27 @@ def _main() -> None:
     cache = SQLite3PretrainedLargeModelCache(Path(".llm_cache.db"))
     llm = OpenAIModel(args.model, cache)
     print(f"Using model: {args.model}")
-    print(f"Using domain: {args.domain}")
-    print(f"Using {args.num_seeds} seed folders")
-    print(f"Generating {args.num_prompts} alternative prompts\n")
+    print(f"Using domain: {args.domain}\n")
 
-    pg3_dir = Path(__file__).parent / "third_party" / "pg3"
-    domain_file = pg3_dir / f"{args.domain}.pddl"
+    pddl_dir = Path(__file__).parent / "third_party" / "pddl"
+    domain_dir = pddl_dir / args.domain
+    domain_file = domain_dir / "domain.pddl"
+
+    if not domain_file.exists():
+        print(f"Error: Domain file {domain_file} does not exist")
+        return
 
     with open(domain_file, "r", encoding="utf-8") as f:
         domain_text = f.read()
 
-    # Collect problems from multiple seed folders
-    problem_files = []
-    for seed_idx in range(args.num_seeds):
-        seed_dir = pg3_dir / args.domain / f"seed{seed_idx}"
-        if not seed_dir.exists():
-            print(f"Warning: {seed_dir} does not exist, skipping")
-            continue
-        seed_problems = sorted(list(seed_dir.glob("problem*.pddl")) + list(seed_dir.glob("task*.pddl")))
-        problem_files.extend(seed_problems)
-        print(f"  Found {len(seed_problems)} problems in seed{seed_idx}")
+    # Collect all problem/task files from domain directory
+    problem_files = sorted(list(domain_dir.glob("problem*.pddl")) + list(domain_dir.glob("task*.pddl")))
 
     if not problem_files:
-        print(f"Error: No problem or task files found")
+        print(f"Error: No problem or task files found in {domain_dir}")
         return
-    print(f"\nTotal: {len(problem_files)} problems across {args.num_seeds} seeds\n")
+
+    print(f"Found {len(problem_files)} problems in {domain_dir}\n")
 
     # Load or generate prompts
     if args.prompts_dir:
@@ -359,7 +349,6 @@ Only output the plan actions, nothing else."""
         "metadata": {
             "model": args.model,
             "domain": args.domain,
-            "num_seeds": args.num_seeds,
             "num_prompts": args.num_prompts,
             "total_problems": len(problem_files),
             "timestamp": datetime.now().isoformat()

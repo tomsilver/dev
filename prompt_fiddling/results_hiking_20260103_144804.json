@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "model": "gpt-4.1",
+    "domain": "hiking",
+    "num_seeds": 3,
+    "num_prompts": 5,
+    "total_problems": 12,
+    "timestamp": "2026-01-03T14:48:04.312978"
+  },
+  "results": [
+    {
+      "index": 0,
+      "name": "prompt1",
+      "prompt": "You're an AI planner. Given these PDDL domain and problem definitions, think through the planning process step by step, explaining your reasoning at each stage (e.g., selecting actions, resolving preconditions). When you've completed the plan, output only the list of action steps inside <plan></plan> tags, one per line, in standard PDDL action format.\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nExample:\nLet's say the plan is [move a b], [pick c]. Output:\n\n<plan>\n(move a b)\n(pick c)\n</plan>",
+      "successes": 12,
+      "failures": 0,
+      "success_rate": 100.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "name": "prompt2",
+      "prompt": "Imagine you are narrating a story where each action taken by an agent in this PDDL problem unfolds step by step. Describe the reasoning and sequence of actions as you go. At the end, summarize the plan actions in PDDL syntax within <plan></plan> tags so they can be extracted for execution.\n\nHere are your materials:\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nBegin storytelling and planning!",
+      "successes": 12,
+      "failures": 0,
+      "success_rate": 100.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        }
+      ]
+    }
+  ]
+}
