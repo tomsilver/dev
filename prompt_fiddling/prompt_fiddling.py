@@ -54,23 +54,43 @@ def _main() -> None:
         default="hiking",
         help="PDDL domain name to use (default: hiking)"
     )
+    parser.add_argument(
+        "--seed",
+        type=str,
+        default="seed0",
+        help="Seed folder to use (default: seed0)"
+    )
     args = parser.parse_args()
 
     cache = SQLite3PretrainedLargeModelCache(Path(".llm_cache.db"))
     llm = OpenAIModel(args.model, cache)
     print(f"Using model: {args.model}")
-    print(f"Using domain: {args.domain}\n")
+    print(f"Using domain: {args.domain}")
+    print(f"Using seed: {args.seed}\n")
 
     pg3_dir = Path(__file__).parent / "third_party" / "pg3"
     domain_file = pg3_dir / f"{args.domain}.pddl"
-    problem_file = pg3_dir / args.domain / "seed0" / "problem0.pddl"
+    seed_dir = pg3_dir / args.domain / args.seed
 
     with open(domain_file, "r", encoding="utf-8") as f:
         domain_text = f.read()
-    with open(problem_file, "r", encoding="utf-8") as f:
-        problem_text = f.read()
 
-    prompt = f"""Given the following PDDL domain and problem, generate a valid plan to solve it.
+    problem_files = sorted(seed_dir.glob("problem*.pddl"))
+    print(f"Found {len(problem_files)} problems in {seed_dir}\n")
+
+    successes = 0
+    failures = 0
+    results = []
+
+    for problem_file in problem_files:
+        print(f"{'='*60}")
+        print(f"Processing {problem_file.name}...")
+        print(f"{'='*60}")
+
+        with open(problem_file, "r", encoding="utf-8") as f:
+            problem_text = f.read()
+
+        prompt = f"""Given the following PDDL domain and problem, generate a valid plan to solve it.
 
 DOMAIN:
 {domain_text}
@@ -83,22 +103,40 @@ Please provide a plan as a list of actions, one per line, in the format:
 
 Only output the plan actions, nothing else."""
 
-    print("Querying LLM for plan...")
-    response = llm.query(prompt)
-    print(f"LLM response:\n{response.text}\n")
+        print("Querying LLM for plan...")
+        response = llm.query(prompt)
 
-    plan = []
-    for line in response.text.strip().split('\n'):
-        line = line.strip()
-        if line.startswith('(') and line.endswith(')'):
-            plan.append(line)
+        plan = []
+        for line in response.text.strip().split('\n'):
+            line = line.strip()
+            if line.startswith('(') and line.endswith(')'):
+                plan.append(line)
 
-    print(f"Extracted {len(plan)} actions from LLM response")
-    print(f"Plan: {plan}\n")
+        print(f"Extracted {len(plan)} actions from LLM response")
 
-    is_valid, message = validate_plan(domain_file, problem_file, plan)
-    print(f"Plan valid: {is_valid}")
-    print(f"Message: {message}")
+        is_valid, message = validate_plan(domain_file, problem_file, plan)
+
+        if is_valid:
+            successes += 1
+            print(f"✓ Plan VALID")
+            results.append((problem_file.name, True, message))
+        else:
+            failures += 1
+            print(f"✗ Plan INVALID: {message}")
+            results.append((problem_file.name, False, message))
+        print()
+
+    print(f"\n{'='*60}")
+    print(f"SUMMARY")
+    print(f"{'='*60}")
+    print(f"Total problems: {len(problem_files)}")
+    print(f"Successes: {successes}")
+    print(f"Failures: {failures}")
+    print(f"Success rate: {successes / len(problem_files) * 100:.1f}%")
+    print(f"\nDetailed results:")
+    for name, valid, msg in results:
+        status = "✓" if valid else "✗"
+        print(f"  {status} {name}: {'Valid' if valid else msg[:80]}")
 
 
 if __name__ == "__main__":
