@@ -7,6 +7,7 @@ import sys
 import subprocess
 import os
 import tempfile
+import argparse
 
 
 def validate_plan(domain_file: Path, problem_file: Path, plan: list[str]) -> tuple[bool, str]:
@@ -40,10 +41,64 @@ def validate_plan(domain_file: Path, problem_file: Path, plan: list[str]) -> tup
 
 
 def _main() -> None:
+    parser = argparse.ArgumentParser(description="Generate and validate PDDL plans using an LLM")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="gpt-4o-mini",
+        help="LLM model name to use (default: gpt-4o-mini)"
+    )
+    parser.add_argument(
+        "--domain",
+        type=str,
+        default="hiking",
+        help="PDDL domain name to use (default: hiking)"
+    )
+    args = parser.parse_args()
+
     cache = SQLite3PretrainedLargeModelCache(Path(".llm_cache.db"))
-    llm = OpenAIModel("gpt-4o-mini", cache)
-    # Example usage:
-    # response = llm.query("What's a funny one liner?")
+    llm = OpenAIModel(args.model, cache)
+    print(f"Using model: {args.model}")
+    print(f"Using domain: {args.domain}\n")
+
+    pg3_dir = Path(__file__).parent / "third_party" / "pg3"
+    domain_file = pg3_dir / f"{args.domain}.pddl"
+    problem_file = pg3_dir / args.domain / "seed0" / "problem0.pddl"
+
+    with open(domain_file, "r", encoding="utf-8") as f:
+        domain_text = f.read()
+    with open(problem_file, "r", encoding="utf-8") as f:
+        problem_text = f.read()
+
+    prompt = f"""Given the following PDDL domain and problem, generate a valid plan to solve it.
+
+DOMAIN:
+{domain_text}
+
+PROBLEM:
+{problem_text}
+
+Please provide a plan as a list of actions, one per line, in the format:
+(action-name arg1 arg2 ...)
+
+Only output the plan actions, nothing else."""
+
+    print("Querying LLM for plan...")
+    response = llm.query(prompt)
+    print(f"LLM response:\n{response.text}\n")
+
+    plan = []
+    for line in response.text.strip().split('\n'):
+        line = line.strip()
+        if line.startswith('(') and line.endswith(')'):
+            plan.append(line)
+
+    print(f"Extracted {len(plan)} actions from LLM response")
+    print(f"Plan: {plan}\n")
+
+    is_valid, message = validate_plan(domain_file, problem_file, plan)
+    print(f"Plan valid: {is_valid}")
+    print(f"Message: {message}")
 
 
 if __name__ == "__main__":
