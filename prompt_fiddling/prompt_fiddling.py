@@ -9,6 +9,8 @@ import os
 import tempfile
 import argparse
 import re
+import json
+from datetime import datetime
 
 
 def validate_plan(domain_file: Path, problem_file: Path, plan: list[str]) -> tuple[bool, str]:
@@ -108,6 +110,27 @@ Make the prompts as DIFFERENT as possible from each other. Be creative!"""
     return prompts
 
 
+def load_and_print_results(results_file: str) -> None:
+    """Load results from a JSON file and print prompt -> score mapping."""
+    with open(results_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    print(f"Results from: {results_file}")
+    print(f"Model: {data['metadata']['model']}")
+    print(f"Domain: {data['metadata']['domain']}")
+    print(f"Total problems: {data['metadata']['total_problems']}")
+    print(f"Timestamp: {data['metadata']['timestamp']}")
+    print(f"\n{'='*70}")
+    print(f"PROMPT -> SCORE MAPPING")
+    print(f"{'='*70}\n")
+
+    for result in data['results']:
+        print(f"Prompt: {result['name']}")
+        print(f"  Score: {result['success_rate']:.1f}%")
+        print(f"  Successes: {result['successes']}/{data['metadata']['total_problems']}")
+        print()
+
+
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Generate and validate PDDL plans using an LLM")
     parser.add_argument(
@@ -134,7 +157,30 @@ def _main() -> None:
         default=5,
         help="Number of alternative prompts to generate (default: 5)"
     )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Output file for results (default: results_<domain>_<timestamp>.json)"
+    )
+    parser.add_argument(
+        "--load",
+        type=str,
+        default=None,
+        help="Load and display results from a JSON file"
+    )
+    parser.add_argument(
+        "--prompts-dir",
+        type=str,
+        default=None,
+        help="Directory containing prompt files (.txt) to evaluate instead of generating prompts"
+    )
     args = parser.parse_args()
+
+    # If load mode, just load and print results
+    if args.load:
+        load_and_print_results(args.load)
+        return
 
     cache = SQLite3PretrainedLargeModelCache(Path(".llm_cache.db"))
     llm = OpenAIModel(args.model, cache)
@@ -165,8 +211,41 @@ def _main() -> None:
         return
     print(f"\nTotal: {len(problem_files)} problems across {args.num_seeds} seeds\n")
 
-    # Base prompt template
-    base_prompt = """Given the following PDDL domain and problem, generate a valid plan to solve it.
+    # Load or generate prompts
+    if args.prompts_dir:
+        # Load prompts from directory
+        prompts_path = Path(args.prompts_dir)
+        if not prompts_path.exists():
+            print(f"Error: Prompts directory {args.prompts_dir} does not exist")
+            return
+
+        prompt_files = sorted(prompts_path.glob("*.txt"))
+        if not prompt_files:
+            print(f"Error: No .txt files found in {args.prompts_dir}")
+            return
+
+        all_prompts = []
+        for prompt_file in prompt_files:
+            with open(prompt_file, "r", encoding="utf-8") as f:
+                prompt_text = f.read()
+            prompt_name = prompt_file.stem
+            all_prompts.append((prompt_name, prompt_text))
+
+        print(f"Loaded {len(all_prompts)} prompts from {args.prompts_dir}\n")
+
+        # Print all loaded prompts
+        print(f"{'='*70}")
+        print(f"ALL LOADED PROMPTS")
+        print(f"{'='*70}\n")
+
+        for idx, (name, prompt_text) in enumerate(all_prompts):
+            print(f"PROMPT {idx}: {name}")
+            print(f"{'-'*70}")
+            print(prompt_text)
+            print(f"\n")
+    else:
+        # Generate prompts using LLM
+        base_prompt = """Given the following PDDL domain and problem, generate a valid plan to solve it.
 
 DOMAIN:
 {domain_text}
@@ -179,28 +258,27 @@ Please provide a plan as a list of actions, one per line, in the format:
 
 Only output the plan actions, nothing else."""
 
-    # Generate alternative prompts
-    alternative_prompts = generate_alternative_prompts(llm, base_prompt, args.num_prompts)
-    print(f"Generated {len(alternative_prompts)} alternative prompts\n")
+        alternative_prompts = generate_alternative_prompts(llm, base_prompt, args.num_prompts)
+        print(f"Generated {len(alternative_prompts)} alternative prompts\n")
 
-    # Print all generated prompts
-    print(f"{'='*70}")
-    print(f"ALL GENERATED PROMPTS")
-    print(f"{'='*70}\n")
+        # Print all generated prompts
+        print(f"{'='*70}")
+        print(f"ALL GENERATED PROMPTS")
+        print(f"{'='*70}\n")
 
-    print(f"PROMPT 0: Base Prompt")
-    print(f"{'-'*70}")
-    print(base_prompt)
-    print(f"\n")
-
-    for idx, (name, prompt_text) in enumerate(alternative_prompts, 1):
-        print(f"PROMPT {idx}: {name}")
+        print(f"PROMPT 0: Base Prompt")
         print(f"{'-'*70}")
-        print(prompt_text)
+        print(base_prompt)
         print(f"\n")
 
-    # Add the base prompt as prompt 0
-    all_prompts = [("Base Prompt", base_prompt)] + alternative_prompts
+        for idx, (name, prompt_text) in enumerate(alternative_prompts, 1):
+            print(f"PROMPT {idx}: {name}")
+            print(f"{'-'*70}")
+            print(prompt_text)
+            print(f"\n")
+
+        # Add the base prompt as prompt 0
+        all_prompts = [("Base Prompt", base_prompt)] + alternative_prompts
 
     # Evaluate each prompt on all problems
     prompt_results = []
@@ -270,6 +348,45 @@ Only output the plan actions, nothing else."""
     print(f"{'='*70}")
     print(best_prompt['prompt'])
     print(f"\nSuccess rate: {best_prompt['success_rate']:.1f}%")
+    print(f"{'='*70}")
+
+    # Save results to JSON file
+    if args.output is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        args.output = f"results_{args.domain}_{timestamp}.json"
+
+    results_data = {
+        "metadata": {
+            "model": args.model,
+            "domain": args.domain,
+            "num_seeds": args.num_seeds,
+            "num_prompts": args.num_prompts,
+            "total_problems": len(problem_files),
+            "timestamp": datetime.now().isoformat()
+        },
+        "results": [
+            {
+                "index": r["index"],
+                "name": r["name"],
+                "prompt": r["prompt"],
+                "successes": r["successes"],
+                "failures": r["failures"],
+                "success_rate": r["success_rate"],
+                "problem_results": [
+                    {"problem": name, "valid": valid, "message": msg}
+                    for name, valid, msg in r["problem_results"]
+                ]
+            }
+            for r in prompt_results
+        ]
+    }
+
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(results_data, f, indent=2)
+
+    print(f"\n{'='*70}")
+    print(f"Results saved to: {args.output}")
+    print(f"Load with: python prompt_fiddling.py --load {args.output}")
     print(f"{'='*70}")
 
 

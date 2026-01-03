@@ -1,0 +1,372 @@
+{
+  "metadata": {
+    "model": "gpt-4.1",
+    "domain": "manymiconic",
+    "num_seeds": 1,
+    "num_prompts": 5,
+    "total_problems": 10,
+    "timestamp": "2026-01-03T14:25:22.960827"
+  },
+  "results": [
+    {
+      "index": 5,
+      "name": "Storytelling Plan with Marked Answer",
+      "prompt": "Imagine you are narrating a story where each action taken by an agent in this PDDL problem unfolds step by step. Describe the reasoning and sequence of actions as you go. At the end, summarize the plan actions in PDDL syntax within <plan></plan> tags so they can be extracted for execution.\n\nHere are your materials:\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nBegin storytelling and planning!",
+      "successes": 5,
+      "failures": 5,
+      "success_rate": 50.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": false,
+          "message": "NOTE: (down f2_b0 f4_b0) has an unsatisfied precondition at time 0\n(Set (above f4_b0 f2_b0) to true)"
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": false,
+          "message": "NOTE: (down f3_b0 f5_b0) has an unsatisfied precondition at time 9\n(Set (above f5_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f2_b0) has an unsatisfied precondition at time 1\n(Set (above f4_b0 f2_b0) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: (depart f1_b0 p0_b0) has an unsatisfied precondition at time 20\n(Set (lift-at f1_b0) to true)"
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": false,
+          "message": "NOTE: (up f3_b0 f2_b0) has an unsatisfied precondition at time 0\n(Set (above f3_b0 f2_b0) to true)"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "name": "Step-by-step Explanation with XML Output",
+      "prompt": "You're an AI planner. Given these PDDL domain and problem definitions, think through the planning process step by step, explaining your reasoning at each stage (e.g., selecting actions, resolving preconditions). When you've completed the plan, output only the list of action steps inside <plan></plan> tags, one per line, in standard PDDL action format.\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nExample:\nLet's say the plan is [move a b], [pick c]. Output:\n\n<plan>\n(move a b)\n(pick c)\n</plan>",
+      "successes": 3,
+      "failures": 7,
+      "success_rate": 30.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": false,
+          "message": "NOTE: (up f7_b0 f5_b0) has an unsatisfied precondition at time 0\n(Set (above f7_b0 f5_b0) to true)"
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": false,
+          "message": "NOTE: (down f1_b0 f5_b0) has an unsatisfied precondition at time 2\n(Set (above f5_b0 f1_b0) to true)"
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": false,
+          "message": "NOTE: (down f2_b0 f3_b0) has an unsatisfied precondition at time 0\n(Set (above f3_b0 f2_b0) to true)"
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": false,
+          "message": "NOTE: (down f1_b0 f2_b0) has an unsatisfied precondition at time 3\n(Set (above f2_b0 f1_b0) to true)"
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f3_b0) has an unsatisfied precondition at time 1\n(Set (above f4_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": false,
+          "message": "NOTE: (down f0_b1 f5_b1) has an unsatisfied precondition at time 8\n(Set (above f5_b1 f0_b1) to true)"
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: (up f1_b0 f0_b0) has an unsatisfied precondition at time 4\n(Set (above f1_b0 f0_b0) to true)"
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        }
+      ]
+    },
+    {
+      "index": 0,
+      "name": "Base Prompt",
+      "prompt": "Given the following PDDL domain and problem, generate a valid plan to solve it.\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nPlease provide a plan as a list of actions, one per line, in the format:\n(action-name arg1 arg2 ...)\n\nOnly output the plan actions, nothing else.",
+      "successes": 2,
+      "failures": 8,
+      "success_rate": 20.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": false,
+          "message": "NOTE: (board f4_b0 p1_b0) has an unsatisfied precondition at time 2\n(Set (origin p1_b0 f4_b0) to true)"
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f3_b0) has an unsatisfied precondition at time 0\n(Set (above f4_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": false,
+          "message": "NOTE: (board f0_b1 p0_b1) has an unsatisfied precondition at time 16\n(Set (origin p0_b1 f0_b1) to true)"
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": false,
+          "message": "NOTE: (up f2_b0 f1_b0) has an unsatisfied precondition at time 0\n(Set (above f2_b0 f1_b0) to true)"
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f2_b0) has an unsatisfied precondition at time 1\n(Set (above f4_b0 f2_b0) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f3_b0) has an unsatisfied precondition at time 1\n(Set (above f4_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: (down f1_b0 f3_b0) has an unsatisfied precondition at time 0\n(Set (above f3_b0 f1_b0) to true)"
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": false,
+          "message": "NOTE: (up f3_b0 f2_b0) has an unsatisfied precondition at time 0\n(Set (above f3_b0 f2_b0) to true)"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "Casual Guide with Inline Reasoning",
+      "prompt": "Hey there! You have a PDDL domain and a problem setup right here:\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nWalk me through your thought process as you figure out the best plan\u2014mention what the initial state is, what your goals are, and how you're choosing each action. When you\u2019re ready, list out each step of your plan under a big \"Final Plan:\" header. Format like:\n\nFinal Plan:\n(action-name arg1 arg2 ...)\n...\n\nThanks!",
+      "successes": 2,
+      "failures": 8,
+      "success_rate": 20.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: The plan did not achieve the goal."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": false,
+          "message": "NOTE: (up f5_b0 f0_b0) has an unsatisfied precondition at time 5\n(Set (above f5_b0 f0_b0) to true)"
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": false,
+          "message": "NOTE: (depart f2_b0 p2_b0) has an unsatisfied precondition at time 0\n(Set (boarded p2_b0) to true)"
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": false,
+          "message": "NOTE: (down f0_b0 f1_b0) has an unsatisfied precondition at time 1\n(Set (above f1_b0 f0_b0) to true)"
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f2_b0) has an unsatisfied precondition at time 1\n(Set (above f4_b0 f2_b0) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": false,
+          "message": "NOTE: The plan did not achieve the goal."
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: The plan did not achieve the goal."
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": false,
+          "message": "NOTE: (up f3_b0 f2_b0) has an unsatisfied precondition at time 0\n(Set (above f3_b0 f2_b0) to true)"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "name": "Formal Instructions with Example and Constraints",
+      "prompt": "You have been tasked with generating a valid solution plan in PDDL format given the domain and problem specification below. The plan should:\n\n- Achieve all goals listed in the problem\n- Use only actions defined in the domain\n- List each action to perform, with appropriate arguments, one per line\n- Follow PDDL syntax: (action arg1 arg2 ...)\n- Exclude redundant actions\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nExample output:\n(move robot room1 room2)\n(pickup robot box)\n\nOnly provide the plan as specified above.",
+      "successes": 2,
+      "failures": 8,
+      "success_rate": 20.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": false,
+          "message": "NOTE: (board f4_b0 p1_b0) has an unsatisfied precondition at time 8\n(Set (origin p1_b0 f4_b0) to true)"
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f3_b0) has an unsatisfied precondition at time 0\n(Set (above f4_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": false,
+          "message": "NOTE: (board f3_b0 p1_b0) has an unsatisfied precondition at time 0\n(Set (origin p1_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": false,
+          "message": "NOTE: (board f2_b0 p2_b0) has an unsatisfied precondition at time 0\n(Set (origin p2_b0 f2_b0) to true)"
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": false,
+          "message": "NOTE: (depart f5_b0 p1_b0) has an unsatisfied precondition at time 10\n(Set (boarded p1_b0) to true)"
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f3_b0) has an unsatisfied precondition at time 0\n(Set (above f4_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": false,
+          "message": "NOTE: (down f0_b1 f5_b1) has an unsatisfied precondition at time 12\n(Set (above f5_b1 f0_b1) to true)"
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: (board f1_b0 p1_b0) has an unsatisfied precondition at time 0\n(Set (origin p1_b0 f1_b0) to true)"
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "Ultra-Concise Direct Plan",
+      "prompt": "DOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nGenerate ONLY the PDDL plan, with one action per line. No preamble, no explanation, no formatting\u2014just the raw action list in the format:\n(action arg1 arg2 ...)\n\nBegin output now.",
+      "successes": 1,
+      "failures": 9,
+      "success_rate": 10.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": false,
+          "message": "NOTE: (board f4_b0 p2_b0) has an unsatisfied precondition at time 3\n(Set (origin p2_b0 f4_b0) to true)"
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": false,
+          "message": "NOTE: (up f7_b0 f6_b0) has an unsatisfied precondition at time 0\n(Set (above f7_b0 f6_b0) to true)"
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: (board f3_b1 p1_b1) has an unsatisfied precondition at time 22\n(Set (origin p1_b1 f3_b1) to true)"
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem4.pddl",
+          "valid": false,
+          "message": "NOTE: (board f4_b1 p2_b1) has an unsatisfied precondition at time 26\n(Set (origin p2_b1 f4_b1) to true)"
+        },
+        {
+          "problem": "problem5.pddl",
+          "valid": false,
+          "message": "NOTE: (board f0_b0 p1_b0) has an unsatisfied precondition at time 11\n(Set (lift-at f0_b0) to true)"
+        },
+        {
+          "problem": "problem6.pddl",
+          "valid": false,
+          "message": "NOTE: (up f4_b0 f3_b0) has an unsatisfied precondition at time 0\n(Set (above f4_b0 f3_b0) to true)"
+        },
+        {
+          "problem": "problem7.pddl",
+          "valid": false,
+          "message": "NOTE: (down f0_b1 f1_b1) has an unsatisfied precondition at time 9\n(Set (above f1_b1 f0_b1) to true)"
+        },
+        {
+          "problem": "problem8.pddl",
+          "valid": false,
+          "message": "NOTE: (down f1_b0 f2_b0) has an unsatisfied precondition at time 0\n(Set (above f2_b0 f1_b0) to true)"
+        },
+        {
+          "problem": "problem9.pddl",
+          "valid": false,
+          "message": "NOTE: (up f3_b0 f2_b0) has an unsatisfied precondition at time 0\n(Set (above f3_b0 f2_b0) to true)"
+        }
+      ]
+    }
+  ]
+}

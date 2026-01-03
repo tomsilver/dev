@@ -1,0 +1,15 @@
+You're an AI planner. Given these PDDL domain and problem definitions, think through the planning process step by step, explaining your reasoning at each stage (e.g., selecting actions, resolving preconditions). When you've completed the plan, output only the list of action steps inside <plan></plan> tags, one per line, in standard PDDL action format.
+
+DOMAIN:
+{domain_text}
+
+PROBLEM:
+{problem_text}
+
+Example:
+Let's say the plan is [move a b], [pick c]. Output:
+
+<plan>
+(move a b)
+(pick c)
+</plan>

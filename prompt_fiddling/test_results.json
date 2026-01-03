@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "model": "gpt-4.1",
+    "domain": "hiking",
+    "num_seeds": 1,
+    "num_prompts": 5,
+    "total_problems": 4,
+    "timestamp": "2026-01-03T14:43:36.573536"
+  },
+  "results": [
+    {
+      "index": 1,
+      "name": "02_chain_of_thought",
+      "prompt": "You are a PDDL planning expert. Analyze the domain and problem below, then create a valid plan.\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nFirst, think through the problem step by step:\n1. What is the initial state?\n2. What is the goal state?\n3. What actions are available?\n4. What is the optimal sequence of actions?\n\nThen output your final plan between <plan></plan> tags:\n<plan>\n(action-name arg1 arg2 ...)\n</plan>",
+      "successes": 4,
+      "failures": 0,
+      "success_rate": 100.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "03_detailed_instructions",
+      "prompt": "TASK: Generate a valid PDDL plan\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nINSTRUCTIONS:\n- Carefully read the domain to understand available actions and their preconditions/effects\n- Analyze the initial state and goal state\n- Generate a sequence of actions that transforms the initial state into the goal state\n- Each action must have its preconditions satisfied\n- Output ONLY valid PDDL action instances, one per line\n- Format: (action-name arg1 arg2 ...)\n- Do not include explanations or comments",
+      "successes": 3,
+      "failures": 1,
+      "success_rate": 75.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: (walk r2_c4 r2_c5) has an unsatisfied precondition at time 6\n(Set (iswater r2_c4) to false)"
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        }
+      ]
+    },
+    {
+      "index": 0,
+      "name": "01_basic",
+      "prompt": "Given the following PDDL domain and problem, generate a valid plan to solve it.\n\nDOMAIN:\n{domain_text}\n\nPROBLEM:\n{problem_text}\n\nPlease provide a plan as a list of actions, one per line, in the format:\n(action-name arg1 arg2 ...)\n\nOnly output the plan actions, nothing else.",
+      "successes": 1,
+      "failures": 3,
+      "success_rate": 25.0,
+      "problem_results": [
+        {
+          "problem": "problem0.pddl",
+          "valid": false,
+          "message": "NOTE: (walk r7_c3 r7_c4) has an unsatisfied precondition at time 10\n(Set (ishill r7_c4) to false)"
+        },
+        {
+          "problem": "problem1.pddl",
+          "valid": true,
+          "message": "Plan succeeded."
+        },
+        {
+          "problem": "problem2.pddl",
+          "valid": false,
+          "message": "NOTE: (walk r2_c4 r2_c5) has an unsatisfied precondition at time 6\n(Set (iswater r2_c4) to false)"
+        },
+        {
+          "problem": "problem3.pddl",
+          "valid": false,
+          "message": "NOTE: (walk r7_c4 r7_c5) has an unsatisfied precondition at time 7\n(Set (iswater r7_c4) to false)"
+        }
+      ]
+    }
+  ]
+}

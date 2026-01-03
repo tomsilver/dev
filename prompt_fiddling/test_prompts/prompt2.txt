@@ -1,0 +1,11 @@
+Imagine you are narrating a story where each action taken by an agent in this PDDL problem unfolds step by step. Describe the reasoning and sequence of actions as you go. At the end, summarize the plan actions in PDDL syntax within <plan></plan> tags so they can be extracted for execution.
+
+Here are your materials:
+
+DOMAIN:
+{domain_text}
+
+PROBLEM:
+{problem_text}
+
+Begin storytelling and planning!
