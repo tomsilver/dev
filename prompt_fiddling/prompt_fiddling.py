@@ -8,6 +8,7 @@ import subprocess
 import os
 import tempfile
 import argparse
+import re
 
 
 def validate_plan(domain_file: Path, problem_file: Path, plan: list[str]) -> tuple[bool, str]:
@@ -40,13 +41,80 @@ def validate_plan(domain_file: Path, problem_file: Path, plan: list[str]) -> tup
     return False, msg
 
 
+def parse_plan_from_response(response_text: str) -> list[str]:
+    """Parse plan actions from LLM response, handling various formats including tags."""
+    plan = []
+
+    # Try to find plan between <plan> tags
+    plan_match = re.search(r'<plan>(.*?)</plan>', response_text, re.DOTALL | re.IGNORECASE)
+    if plan_match:
+        text_to_parse = plan_match.group(1)
+    else:
+        text_to_parse = response_text
+
+    # Extract all lines that look like PDDL actions
+    for line in text_to_parse.strip().split('\n'):
+        line = line.strip()
+        if line.startswith('(') and line.endswith(')'):
+            plan.append(line)
+
+    return plan
+
+
+def generate_alternative_prompts(llm: OpenAIModel, base_prompt: str, num_prompts: int) -> list[tuple[str, str]]:
+    """Generate N alternative prompts with different styles and approaches."""
+    meta_prompt = f"""You are an expert at prompt engineering for PDDL planning tasks. Given the base prompt below, generate {num_prompts} WILDLY DIFFERENT alternative prompts that could be used to ask an LLM to generate a PDDL plan.
+
+BASE PROMPT:
+{base_prompt}
+
+Your alternative prompts should vary along these dimensions:
+- Level of specificity (very detailed vs. very terse)
+- Wording and style (formal, casual, instructive, etc.)
+- Instructions for reasoning (chain-of-thought, step-by-step, direct answer, etc.)
+- Output format (allow thinking/reasoning in the response, use XML tags like <plan></plan>, etc.)
+- Examples and explanations (include examples, domain knowledge, constraints, etc.)
+
+For prompts that allow reasoning, use <plan></plan> tags to wrap the final plan so it can be parsed.
+
+Please output exactly {num_prompts} prompts in the following format:
+
+<prompt id="1" name="Short descriptive name">
+Full prompt text here...
+</prompt>
+
+<prompt id="2" name="Short descriptive name">
+Full prompt text here...
+</prompt>
+
+...and so on.
+
+Make the prompts as DIFFERENT as possible from each other. Be creative!"""
+
+    print("Generating alternative prompts...")
+    response = llm.query(meta_prompt)
+
+    # Parse the prompts from the response
+    prompts = []
+    pattern = r'<prompt id="(\d+)" name="([^"]+)">(.*?)</prompt>'
+    matches = re.findall(pattern, response.text, re.DOTALL)
+
+    for prompt_id, name, content in matches:
+        prompts.append((name.strip(), content.strip()))
+
+    if len(prompts) < num_prompts:
+        print(f"Warning: Only generated {len(prompts)} prompts instead of {num_prompts}")
+
+    return prompts
+
+
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Generate and validate PDDL plans using an LLM")
     parser.add_argument(
         "--model",
         type=str,
-        default="gpt-4o-mini",
-        help="LLM model name to use (default: gpt-4o-mini)"
+        default="gpt-4.1",
+        help="LLM model name to use (default: gpt-4.1)"
     )
     parser.add_argument(
         "--domain",
@@ -60,13 +128,20 @@ def _main() -> None:
         default="seed0",
         help="Seed folder to use (default: seed0)"
     )
+    parser.add_argument(
+        "--num-prompts",
+        type=int,
+        default=5,
+        help="Number of alternative prompts to generate (default: 5)"
+    )
     args = parser.parse_args()
 
     cache = SQLite3PretrainedLargeModelCache(Path(".llm_cache.db"))
     llm = OpenAIModel(args.model, cache)
     print(f"Using model: {args.model}")
     print(f"Using domain: {args.domain}")
-    print(f"Using seed: {args.seed}\n")
+    print(f"Using seed: {args.seed}")
+    print(f"Generating {args.num_prompts} alternative prompts\n")
 
     pg3_dir = Path(__file__).parent / "third_party" / "pg3"
     domain_file = pg3_dir / f"{args.domain}.pddl"
@@ -75,22 +150,15 @@ def _main() -> None:
     with open(domain_file, "r", encoding="utf-8") as f:
         domain_text = f.read()
 
-    problem_files = sorted(seed_dir.glob("problem*.pddl"))
+    # Try both problem*.pddl and task*.pddl patterns
+    problem_files = sorted(list(seed_dir.glob("problem*.pddl")) + list(seed_dir.glob("task*.pddl")))
+    if not problem_files:
+        print(f"Error: No problem or task files found in {seed_dir}")
+        return
     print(f"Found {len(problem_files)} problems in {seed_dir}\n")
 
-    successes = 0
-    failures = 0
-    results = []
-
-    for problem_file in problem_files:
-        print(f"{'='*60}")
-        print(f"Processing {problem_file.name}...")
-        print(f"{'='*60}")
-
-        with open(problem_file, "r", encoding="utf-8") as f:
-            problem_text = f.read()
-
-        prompt = f"""Given the following PDDL domain and problem, generate a valid plan to solve it.
+    # Base prompt template
+    base_prompt = """Given the following PDDL domain and problem, generate a valid plan to solve it.
 
 DOMAIN:
 {domain_text}
@@ -103,40 +171,98 @@ Please provide a plan as a list of actions, one per line, in the format:
 
 Only output the plan actions, nothing else."""
 
-        print("Querying LLM for plan...")
-        response = llm.query(prompt)
+    # Generate alternative prompts
+    alternative_prompts = generate_alternative_prompts(llm, base_prompt, args.num_prompts)
+    print(f"Generated {len(alternative_prompts)} alternative prompts\n")
 
-        plan = []
-        for line in response.text.strip().split('\n'):
-            line = line.strip()
-            if line.startswith('(') and line.endswith(')'):
-                plan.append(line)
+    # Print all generated prompts
+    print(f"{'='*70}")
+    print(f"ALL GENERATED PROMPTS")
+    print(f"{'='*70}\n")
 
-        print(f"Extracted {len(plan)} actions from LLM response")
+    print(f"PROMPT 0: Base Prompt")
+    print(f"{'-'*70}")
+    print(base_prompt)
+    print(f"\n")
 
-        is_valid, message = validate_plan(domain_file, problem_file, plan)
+    for idx, (name, prompt_text) in enumerate(alternative_prompts, 1):
+        print(f"PROMPT {idx}: {name}")
+        print(f"{'-'*70}")
+        print(prompt_text)
+        print(f"\n")
 
-        if is_valid:
-            successes += 1
-            print(f"✓ Plan VALID")
-            results.append((problem_file.name, True, message))
-        else:
-            failures += 1
-            print(f"✗ Plan INVALID: {message}")
-            results.append((problem_file.name, False, message))
+    # Add the base prompt as prompt 0
+    all_prompts = [("Base Prompt", base_prompt)] + alternative_prompts
+
+    # Evaluate each prompt on all problems
+    prompt_results = []
+
+    for prompt_idx, (prompt_name, prompt_template) in enumerate(all_prompts):
+        print(f"\n{'='*70}")
+        print(f"EVALUATING PROMPT {prompt_idx}: {prompt_name}")
+        print(f"{'='*70}\n")
+
+        successes = 0
+        failures = 0
+        problem_results = []
+
+        for problem_file in problem_files:
+            with open(problem_file, "r", encoding="utf-8") as f:
+                problem_text = f.read()
+
+            # Format the prompt with domain and problem
+            prompt = prompt_template.replace("{domain_text}", domain_text).replace("{problem_text}", problem_text)
+
+            print(f"  {problem_file.name}...", end=" ", flush=True)
+
+            response = llm.query(prompt)
+            plan = parse_plan_from_response(response.text)
+
+            is_valid, message = validate_plan(domain_file, problem_file, plan)
+
+            if is_valid:
+                successes += 1
+                print("✓")
+                problem_results.append((problem_file.name, True, message))
+            else:
+                failures += 1
+                print(f"✗")
+                problem_results.append((problem_file.name, False, message))
+
+        success_rate = successes / len(problem_files) * 100 if problem_files else 0
+        print(f"\n  Summary: {successes}/{len(problem_files)} correct ({success_rate:.1f}%)")
+
+        prompt_results.append({
+            "index": prompt_idx,
+            "name": prompt_name,
+            "prompt": prompt_template,
+            "successes": successes,
+            "failures": failures,
+            "success_rate": success_rate,
+            "problem_results": problem_results
+        })
+
+    # Sort prompts by success rate (descending)
+    prompt_results.sort(key=lambda x: x["success_rate"], reverse=True)
+
+    # Print final summary
+    print(f"\n\n{'='*70}")
+    print(f"FINAL RANKING (sorted by success rate)")
+    print(f"{'='*70}\n")
+
+    for rank, result in enumerate(prompt_results, 1):
+        print(f"Rank {rank}: {result['name']} (Prompt {result['index']})")
+        print(f"  Success rate: {result['success_rate']:.1f}% ({result['successes']}/{len(problem_files)})")
         print()
 
-    print(f"\n{'='*60}")
-    print(f"SUMMARY")
-    print(f"{'='*60}")
-    print(f"Total problems: {len(problem_files)}")
-    print(f"Successes: {successes}")
-    print(f"Failures: {failures}")
-    print(f"Success rate: {successes / len(problem_files) * 100:.1f}%")
-    print(f"\nDetailed results:")
-    for name, valid, msg in results:
-        status = "✓" if valid else "✗"
-        print(f"  {status} {name}: {'Valid' if valid else msg[:80]}")
+    # Print best prompt
+    best_prompt = prompt_results[0]
+    print(f"\n{'='*70}")
+    print(f"BEST PERFORMING PROMPT: {best_prompt['name']}")
+    print(f"{'='*70}")
+    print(best_prompt['prompt'])
+    print(f"\nSuccess rate: {best_prompt['success_rate']:.1f}%")
+    print(f"{'='*70}")
 
 
 if __name__ == "__main__":
